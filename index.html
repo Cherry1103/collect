@@ -4,23 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>💃 舞蹈团截图收集</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Arial', sans-serif;
+    /* 基础样式确保能显示 */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: Arial, sans-serif; 
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
-      color: #333;
+      min-height: 100vh; 
+      padding: 20px; 
     }
-
+    .debug-info {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(255,255,255,0.9);
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      z-index: 9999;
+    }
     .container {
       max-width: 800px;
       margin: 0 auto;
@@ -28,509 +30,95 @@
       border-radius: 20px;
       padding: 30px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(10px);
     }
-
     h1 {
       text-align: center;
       color: #4a5568;
       margin-bottom: 30px;
-      font-size: 2.5em;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+      font-size: 2em;
     }
-
-    .section {
-      margin-bottom: 30px;
-      padding: 25px;
-      background: linear-gradient(145deg, #f7fafc, #edf2f7);
-      border-radius: 15px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .section h3 {
-      color: #2d3748;
-      margin-bottom: 15px;
-      font-size: 1.3em;
-    }
-
-    input[type="text"], input[type="password"] {
-      width: 100%;
-      padding: 12px 16px;
-      border: 2px solid #e2e8f0;
-      border-radius: 10px;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      background: white;
-      margin-bottom: 15px;
-    }
-
-    input[type="text"]:focus, input[type="password"]:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-      transform: translateY(-2px);
-    }
-
-    input[type="file"] {
-      width: 100%;
-      padding: 12px;
-      border: 2px dashed #667eea;
-      border-radius: 10px;
-      background: #f7fafc;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-bottom: 15px;
-    }
-
-    input[type="file"]:hover {
-      border-color: #4c51bf;
-      background: #edf2f7;
-    }
-
-    button {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-      font-weight: 600;
-    }
-
-    button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-    }
-
-    button:active {
-      transform: translateY(-1px);
-    }
-
-    .admin-panel {
-      background: linear-gradient(145deg, #f0fff4, #e6fffa);
-      border: 2px solid #68d391;
-    }
-
-    .status-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-
-    .status-card {
+    .loading-message {
+      text-align: center;
       padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    .submitted-card {
-      background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
-      border: 2px solid #48bb78;
-    }
-
-    .pending-card {
-      background: linear-gradient(135deg, #fed7d7, #feb2b2);
-      border: 2px solid #f56565;
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
-    }
-
-    .gallery-item {
-      background: white;
-      border-radius: 12px;
-      padding: 15px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
-    }
-
-    .gallery-item:hover {
-      transform: translateY(-5px);
-    }
-
-    .gallery-item img {
-      width: 100%;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
-
-    .gallery-item p {
-      font-weight: 600;
-      color: #2d3748;
-      text-align: center;
-    }
-
-    /* 成功动画 */
-    .success-animation {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: linear-gradient(135deg, #48bb78, #68d391);
-      color: white;
-      padding: 30px;
-      border-radius: 20px;
-      text-align: center;
-      box-shadow: 0 20px 40px rgba(72, 187, 120, 0.3);
-      z-index: 1000;
-      animation: successPop 0.5s ease-out;
-    }
-
-    @keyframes successPop {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    }
-
-    /* Cherry 爱心动画 */
-    .cherry-heart {
-      position: fixed;
-      color: #e53e3e;
-      font-size: 24px;
-      pointer-events: none;
-      z-index: 999;
-      animation: floatUp 3s ease-out forwards;
-    }
-
-    @keyframes floatUp {
-      0% { opacity: 1; transform: translateY(0) rotate(0deg); }
-      100% { opacity: 0; transform: translateY(-200px) rotate(360deg); }
-    }
-
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 999;
-    }
-
-    .emoji {
-      font-size: 1.2em;
-      margin-right: 8px;
-    }
-
-    .name-tag {
-      display: inline-block;
-      padding: 8px 12px;
-      margin: 5px;
-      border-radius: 20px;
-      font-weight: 600;
-    }
-
-    .submitted-tag {
-      background: #c6f6d5;
-      color: #22543d;
-      border: 2px solid #48bb78;
-    }
-
-    .pending-tag {
-      background: #fed7d7;
-      color: #742a2a;
-      border: 2px solid #f56565;
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        margin: 10px;
-        padding: 20px;
-      }
-      
-      .status-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .gallery {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      }
+      font-size: 18px;
+      color: #4a5568;
     }
   </style>
 </head>
 <body>
+  <!-- 调试信息 -->
+  <div class="debug-info" id="debugInfo">
+    加载中...
+  </div>
+
   <div class="container">
     <h1>💃 舞蹈团截图收集 🌸</h1>
-
-    <!-- 上传区 -->
-    <div class="section">
-      <h3>📸 上传截图</h3>
-      <input type="text" id="nameInput" placeholder="✨ 请输入你的姓名">
-      <input type="file" id="fileInput" accept="image/*">
-      <button onclick="handleUpload()">
-        <span class="emoji">🚀</span>上传截图
-      </button>
+    <div class="loading-message" id="loadingMsg">
+      🔄 正在加载，请稍候...
     </div>
-
-    <!-- 管理员区 -->
-    <div class="section">
-      <h3>🔐 管理员入口</h3>
-      <input type="password" id="adminPass" placeholder="请输入管理员密码">
-      <button onclick="enterAdmin()">
-        <span class="emoji">🎭</span>进入后台
-      </button>
-    </div>
-
-    <!-- 名单展示 -->
-    <div id="adminPanel" class="section admin-panel" style="display:none;">
-      <h2>📊 提交情况总览</h2>
-      
-      <div class="status-grid">
-        <div class="status-card submitted-card">
-          <h3>✅ 已提交</h3>
-          <div id="submittedList"></div>
-        </div>
-        <div class="status-card pending-card">
-          <h3>⏳ 未提交</h3>
-          <div id="pendingList"></div>
-        </div>
-      </div>
-
-      <h2>🖼️ 截图画廊</h2>
-      <div id="gallery" class="gallery"></div>
-
-      <button onclick="downloadAll()" style="margin-top: 20px; width: 100%;">
-        <span class="emoji">📦</span>批量下载所有截图
-      </button>
+    <div id="mainContent" style="display:none;">
+      <!-- 主要内容将在这里加载 -->
     </div>
   </div>
 
   <script>
-    // Supabase 配置
-    const SUPABASE_URL = "https://yeypsjhfmmamfxajnias.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlleXBzamhmbW1hbWZ4YWpuaWFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0ODYzMzUsImV4cCI6MjA3MTA2MjMzNX0.lnebqcmjeyKbb1qFm0r9YN0HdWLKC9Wtaz45dLd2lqY";
-    const { createClient } = supabase;
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // 全名单（示例）
-    const FULL_LIST = ["张三", "李四", "王五", "小红", "小明", "小花"];
-
-    const submittedList = document.getElementById("submittedList");
-    const pendingList = document.getElementById("pendingList");
-    const gallery = document.getElementById("gallery");
-
-    // 创建Cherry爱心动画
-    function createCherryHearts() {
-      const hearts = ['🍒❤️', '💖🍒', '💕', '💗', '🌸💖', '✨💕'];
-      
-      for (let i = 0; i < 20; i++) {
-        setTimeout(() => {
-          const heart = document.createElement('div');
-          heart.className = 'cherry-heart';
-          heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
-          heart.style.left = Math.random() * window.innerWidth + 'px';
-          heart.style.top = window.innerHeight + 'px';
-          heart.style.animationDelay = Math.random() * 0.5 + 's';
-          document.body.appendChild(heart);
-          
-          setTimeout(() => {
-            if (document.body.contains(heart)) {
-              document.body.removeChild(heart);
-            }
-          }, 3000);
-        }, i * 100);
-      }
+    // 调试信息
+    function updateDebug(msg) {
+      document.getElementById('debugInfo').innerHTML = msg;
+      console.log('Debug:', msg);
     }
 
-    // 显示成功动画
-    function showSuccessAnimation() {
-      const overlay = document.createElement('div');
-      overlay.className = 'overlay';
-      
-      const successDiv = document.createElement('div');
-      successDiv.className = 'success-animation';
-      successDiv.innerHTML = `
-        <h2>🎉 上传成功！</h2>
-        <p>🌸 Cherry 向你发射爱心~ 💖</p>
-      `;
-      
-      document.body.appendChild(overlay);
-      document.body.appendChild(successDiv);
-      
-      // 发射Cherry爱心
-      createCherryHearts();
-      
-      // 3秒后移除动画
-      setTimeout(() => {
-        if (document.body.contains(overlay)) {
-          document.body.removeChild(overlay);
-        }
-        if (document.body.contains(successDiv)) {
-          document.body.removeChild(successDiv);
-        }
-      }, 3000);
-    }
+    // 检查基础功能
+    updateDebug('1. HTML加载完成');
 
-    // 处理文件名，避免中文/空格
-    function safeFileName(file) {
-      const ext = file.name.split('.').pop();
-      return `${Date.now()}_${Math.floor(Math.random() * 10000)}.${ext}`;
-    }
+    // 检查是否是移动设备
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    updateDebug(`2. 设备: ${isMobile ? '移动端' : '桌面端'}`);
 
-    // 上传文件
-    async function uploadFile(file, name) {
-      const safeName = safeFileName(file);
+    // 加载 Supabase
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    script.onload = function() {
+      updateDebug('3. Supabase 加载成功');
+      initializeApp();
+    };
+    script.onerror = function() {
+      updateDebug('3. Supabase 加载失败');
+      document.getElementById('loadingMsg').innerHTML = '❌ 网络连接问题，请检查网络后刷新';
+    };
+    document.head.appendChild(script);
 
+    function initializeApp() {
+      updateDebug('4. 开始初始化应用');
+      
+      // 这里放你的主要代码
       try {
-        // 1. 上传到 storage
-        const { data, error } = await supabaseClient.storage
-          .from('screenshots')
-          .upload(safeName, file);
-
-        if (error) {
-          alert('上传失败：' + error.message);
-          return;
-        }
-
-        // 2. 获取公开 URL
-        const { data: { publicUrl } } = supabaseClient.storage
-          .from('screenshots')
-          .getPublicUrl(safeName);
-
-        // 3. 写入数据库
-        const { error: insertError } = await supabaseClient
-          .from('uploads')
-          .insert([{ name, file_url: publicUrl }]);
-
-        if (insertError) {
-          alert('上传成功，但保存记录失败：' + insertError.message);
-        } else {
-          showSuccessAnimation();
-          document.getElementById("nameInput").value = '';
-          document.getElementById("fileInput").value = '';
-          if (document.getElementById("adminPanel").style.display !== "none") {
-            renderStatus();
-          }
-        }
-      } catch (error) {
-        alert('上传过程中发生错误：' + error.message);
-        console.error(error);
-      }
-    }
-
-    // 提交上传
-    function handleUpload() {
-      const name = document.getElementById("nameInput").value.trim();
-      const file = document.getElementById("fileInput").files[0];
-      
-      if (!name || !file) {
-        alert("🙋‍♀️ 请填写姓名并选择文件哦～");
-        return;
-      }
-      
-      if (!file.type.startsWith('image/')) {
-        alert("📸 请选择图片文件");
-        return;
-      }
-      
-      uploadFile(file, name);
-    }
-
-    // 渲染名单 & 画廊
-    async function renderStatus() {
-      try {
-        let { data, error } = await supabaseClient.from("uploads").select("*");
-        if (error) { 
-          alert("获取数据失败：" + error.message); 
-          return; 
-        }
-
-        const submittedNames = [...new Set(data.map(d => d.name))];
-        const pendingNames = FULL_LIST.filter(n => !submittedNames.includes(n));
-
-        submittedList.innerHTML = submittedNames.length > 0 
-          ? submittedNames.map(n => `<span class="name-tag submitted-tag">✅ ${n}</span>`).join("")
-          : '<p style="color: #718096;">暂无提交</p>';
-          
-        pendingList.innerHTML = pendingNames.length > 0
-          ? pendingNames.map(n => `<span class="name-tag pending-tag">⏳ ${n}</span>`).join("")
-          : '<p style="color: #48bb78; font-weight: 600;">🎉 全部已提交！</p>';
-
-        gallery.innerHTML = "";
-        data.forEach((row, index) => {
-          let div = document.createElement("div");
-          div.className = "gallery-item";
-          div.innerHTML = `
-            <p>📸 ${row.name}</p>
-            <img src="${row.file_url}" alt="screenshot" loading="lazy">
-          `;
-          gallery.appendChild(div);
-        });
-      } catch (error) {
-        console.error('渲染状态时发生错误:', error);
-      }
-    }
-
-    // 批量下载
-    async function downloadAll() {
-      try {
-        let { data, error } = await supabaseClient.from("uploads").select("*");
-        if (error) { 
-          alert("获取数据失败：" + error.message); 
-          return; 
-        }
-
-        if (data.length === 0) {
-          alert("📭 暂无截图可下载");
-          return;
-        }
-
-        const zip = new JSZip();
-
-        for (let i = 0; i < data.length; i++) {
-          const row = data[i];
-          try {
-            const response = await fetch(row.file_url);
-            const blob = await response.blob();
-            const ext = row.file_url.split('.').pop() || 'jpg';
-            zip.file(`${row.name}_${i+1}.${ext}`, blob);
-          } catch (fetchError) {
-            console.error(`下载 ${row.name} 的截图失败:`, fetchError);
-          }
-        }
-
-        const content = await zip.generateAsync({type:"blob"});
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(content);
-        link.download = `舞蹈团截图_${new Date().toLocaleDateString()}.zip`;
-        link.click();
+        const SUPABASE_URL = "https://yeypsjhfmmamfxajnias.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlleXBzamhmbW1hbWZ4YWpuaWFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0ODYzMzUsImV4cCI6MjA3MTA2MjMzNX0.lnebqcmjeyKbb1qFm0r9YN0HdWLKC9Wtaz45dLd2lqY";
         
-        alert("📦 下载完成！");
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        updateDebug('5. Supabase 客户端创建成功');
+        
+        // 隐藏加载信息，显示主内容
+        document.getElementById('loadingMsg').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+        document.getElementById('mainContent').innerHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <h2>🎉 加载成功！</h2>
+            <p>如果你看到这个消息，说明应用可以正常运行。</p>
+            <p>现在我可以给你完整版本了！</p>
+          </div>
+        `;
+        
+        updateDebug('6. 应用初始化完成');
+        
       } catch (error) {
-        alert("下载过程中发生错误：" + error.message);
-        console.error(error);
+        updateDebug('5. 初始化失败: ' + error.message);
+        document.getElementById('loadingMsg').innerHTML = '❌ 初始化失败: ' + error.message;
       }
     }
-
-    // 管理员入口
-    function enterAdmin() {
-      const pass = document.getElementById("adminPass").value;
-      if (pass === "danceadmin") {
-        document.getElementById("adminPanel").style.display = "block";
-        document.getElementById("adminPass").value = '';
-        renderStatus();
-        alert("🎭 欢迎进入管理后台！");
-      } else {
-        alert("🔐 密码错误，请重试");
-      }
-    }
-
-    // 页面加载时的欢迎动画
-    window.addEventListener('load', () => {
-      document.body.style.opacity = '0';
-      document.body.style.transition = 'opacity 0.5s ease-in';
-      setTimeout(() => {
-        document.body.style.opacity = '1';
-      }, 100);
-    });
   </script>
 </body>
 </html>
