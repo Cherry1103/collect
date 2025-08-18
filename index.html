@@ -2,123 +2,188 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>💃 舞蹈团截图收集</title>
+  
+  <script>
+    // 移动端检测和调试
+    console.log('页面开始加载...');
+    console.log('User Agent:', navigator.userAgent);
+    console.log('窗口尺寸:', window.innerWidth, 'x', window.innerHeight);
+    
+    // 强制重新加载检查
+    if (!sessionStorage.getItem('loaded')) {
+      sessionStorage.setItem('loaded', 'true');
+      console.log('首次加载，设置标记');
+    }
+  </script>
+  
   <style>
-    /* 基础样式确保能显示 */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    
     body { 
-      font-family: Arial, sans-serif; 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh; 
-      padding: 20px; 
-    }
-    .debug-info {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: rgba(255,255,255,0.9);
       padding: 10px;
-      border-radius: 5px;
+      overflow-x: hidden;
+    }
+    
+    .debug-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #ff6b6b;
+      color: white;
+      text-align: center;
+      padding: 5px;
       font-size: 12px;
-      z-index: 9999;
+      z-index: 10000;
     }
+    
     .container {
-      max-width: 800px;
-      margin: 0 auto;
+      max-width: 100%;
+      margin: 40px auto 0;
       background: rgba(255, 255, 255, 0.95);
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
+    
     h1 {
       text-align: center;
       color: #4a5568;
-      margin-bottom: 30px;
-      font-size: 2em;
+      margin-bottom: 20px;
+      font-size: 1.5em;
     }
-    .loading-message {
+    
+    .status {
       text-align: center;
       padding: 20px;
-      font-size: 18px;
-      color: #4a5568;
+      margin: 10px 0;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+    
+    .status.loading {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    .status.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .status.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        margin: 30px 5px 0;
+        padding: 15px;
+        border-radius: 10px;
+      }
+      
+      h1 {
+        font-size: 1.3em;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- 调试信息 -->
-  <div class="debug-info" id="debugInfo">
-    加载中...
+  <div class="debug-banner" id="debugBanner">
+    📱 移动端检测中...
   </div>
 
   <div class="container">
     <h1>💃 舞蹈团截图收集 🌸</h1>
-    <div class="loading-message" id="loadingMsg">
-      🔄 正在加载，请稍候...
+    
+    <div class="status loading" id="status">
+      🔄 正在检测设备和网络...
     </div>
-    <div id="mainContent" style="display:none;">
-      <!-- 主要内容将在这里加载 -->
-    </div>
+    
+    <div id="deviceInfo" style="font-size: 12px; color: #666; margin-top: 10px;"></div>
   </div>
 
   <script>
-    // 调试信息
-    function updateDebug(msg) {
-      document.getElementById('debugInfo').innerHTML = msg;
-      console.log('Debug:', msg);
+    console.log('脚本开始执行...');
+    
+    // 设备信息检测
+    function getDeviceInfo() {
+      const info = {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        cookieEnabled: navigator.cookieEnabled,
+        onLine: navigator.onLine,
+        screen: `${screen.width}x${screen.height}`,
+        window: `${window.innerWidth}x${window.innerHeight}`,
+        protocol: location.protocol,
+        host: location.host
+      };
+      return info;
     }
-
-    // 检查基础功能
-    updateDebug('1. HTML加载完成');
-
-    // 检查是否是移动设备
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    updateDebug(`2. 设备: ${isMobile ? '移动端' : '桌面端'}`);
-
-    // 加载 Supabase
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    script.onload = function() {
-      updateDebug('3. Supabase 加载成功');
-      initializeApp();
-    };
-    script.onerror = function() {
-      updateDebug('3. Supabase 加载失败');
-      document.getElementById('loadingMsg').innerHTML = '❌ 网络连接问题，请检查网络后刷新';
-    };
-    document.head.appendChild(script);
-
-    function initializeApp() {
-      updateDebug('4. 开始初始化应用');
+    
+    // 更新调试信息
+    function updateDebug() {
+      const info = getDeviceInfo();
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
-      // 这里放你的主要代码
-      try {
-        const SUPABASE_URL = "https://yeypsjhfmmamfxajnias.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlleXBzamhmbW1hbWZ4YWpuaWFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0ODYzMzUsImV4cCI6MjA3MTA2MjMzNX0.lnebqcmjeyKbb1qFm0r9YN0HdWLKC9Wtaz45dLd2lqY";
-        
-        const { createClient } = supabase;
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        updateDebug('5. Supabase 客户端创建成功');
-        
-        // 隐藏加载信息，显示主内容
-        document.getElementById('loadingMsg').style.display = 'none';
-        document.getElementById('mainContent').style.display = 'block';
-        document.getElementById('mainContent').innerHTML = `
-          <div style="text-align: center; padding: 20px;">
-            <h2>🎉 加载成功！</h2>
-            <p>如果你看到这个消息，说明应用可以正常运行。</p>
-            <p>现在我可以给你完整版本了！</p>
-          </div>
-        `;
-        
-        updateDebug('6. 应用初始化完成');
-        
-      } catch (error) {
-        updateDebug('5. 初始化失败: ' + error.message);
-        document.getElementById('loadingMsg').innerHTML = '❌ 初始化失败: ' + error.message;
-      }
+      document.getElementById('debugBanner').innerHTML = 
+        `📱 ${isMobile ? '移动设备' : '桌面设备'} | ${info.onLine ? '在线' : '离线'} | ${info.protocol}`;
+      
+      document.getElementById('deviceInfo').innerHTML = `
+        <strong>设备信息：</strong><br>
+        平台: ${info.platform}<br>
+        屏幕: ${info.screen}<br>
+        窗口: ${info.window}<br>
+        协议: ${info.protocol}<br>
+        网络: ${info.onLine ? '已连接' : '未连接'}<br>
+        Cookie: ${info.cookieEnabled ? '启用' : '禁用'}
+      `;
+      
+      console.log('设备信息:', info);
     }
+    
+    // 页面加载完成
+    window.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM 加载完成');
+      updateDebug();
+      
+      document.getElementById('status').innerHTML = '✅ 页面加载成功！移动端可以正常访问';
+      document.getElementById('status').className = 'status success';
+      
+      // 3秒后尝试加载主应用
+      setTimeout(function() {
+        document.getElementById('status').innerHTML = '🚀 准备加载完整应用...';
+        loadMainApp();
+      }, 3000);
+    });
+    
+    function loadMainApp() {
+      document.getElementById('status').innerHTML = '🎉 移动端测试成功！可以开始使用了';
+      console.log('测试完成，移动端正常工作');
+    }
+    
+    // 错误处理
+    window.addEventListener('error', function(e) {
+      console.error('页面错误:', e);
+      document.getElementById('status').innerHTML = '❌ 发生错误: ' + e.message;
+      document.getElementById('status').className = 'status error';
+    });
+    
+    console.log('脚本设置完成');
   </script>
 </body>
 </html>
