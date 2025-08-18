@@ -2,188 +2,480 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>💃 舞蹈团截图收集</title>
-  
-  <script>
-    // 移动端检测和调试
-    console.log('页面开始加载...');
-    console.log('User Agent:', navigator.userAgent);
-    console.log('窗口尺寸:', window.innerWidth, 'x', window.innerHeight);
-    
-    // 强制重新加载检查
-    if (!sessionStorage.getItem('loaded')) {
-      sessionStorage.setItem('loaded', 'true');
-      console.log('首次加载，设置标记');
-    }
-  </script>
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💃 舞蹈团截图收集管理系统</title>
   <style>
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     
     body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
       min-height: 100vh; 
       padding: 10px;
-      overflow-x: hidden;
     }
     
-    .debug-banner {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: #ff6b6b;
-      color: white;
-      text-align: center;
-      padding: 5px;
-      font-size: 12px;
-      z-index: 10000;
+    .cherry { 
+      position: fixed; 
+      font-size: 20px; 
+      user-select: none; 
+      pointer-events: none; 
+      z-index: 1000;
+      opacity: 0.8;
     }
     
     .container {
-      max-width: 100%;
-      margin: 40px auto 0;
+      max-width: 800px;
+      margin: 20px auto;
       background: rgba(255, 255, 255, 0.95);
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
     }
     
     h1 {
       text-align: center;
-      color: #4a5568;
-      margin-bottom: 20px;
-      font-size: 1.5em;
+      color: #d63384;
+      margin-bottom: 30px;
+      font-size: 2.2em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
     
-    .status {
+    .tabs {
+      display: flex;
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 15px;
+      padding: 5px;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+    
+    .tab.active {
+      background: linear-gradient(45deg, #d63384, #dc3545);
+      color: white;
+      box-shadow: 0 4px 15px rgba(214, 51, 132, 0.3);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .form-container {
       text-align: center;
       padding: 20px;
-      margin: 10px 0;
-      border-radius: 10px;
+    }
+    
+    .submit-button {
+      background: linear-gradient(45deg, #d63384, #dc3545);
+      color: white;
+      padding: 20px 40px;
+      border: none;
+      border-radius: 15px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(214, 51, 132, 0.3);
+      margin: 10px;
+    }
+    
+    .submit-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(214, 51, 132, 0.4);
+    }
+    
+    .admin-button {
+      background: linear-gradient(45deg, #28a745, #20c997) !important;
+    }
+    
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      margin: 20px 0;
+    }
+    
+    .file-input {
+      position: absolute;
+      left: -9999px;
+    }
+    
+    .file-input-button {
+      background: linear-gradient(45deg, #ffc107, #ff8800);
+      color: white;
+      padding: 15px 25px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    }
+    
+    .file-input-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+    }
+    
+    textarea {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      font-size: 16px;
+      min-height: 120px;
+      margin: 15px 0;
+      font-family: monospace;
+    }
+    
+    .name-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .name-item {
+      padding: 15px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .name-item.submitted {
+      background: linear-gradient(45deg, #d4edda, #c3e6cb);
+      color: #155724;
+      border: 2px solid #c3e6cb;
+    }
+    
+    .name-item.not-submitted {
+      background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+      color: #721c24;
+      border: 2px solid #f5c6cb;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stat-number {
+      font-size: 2.5em;
       font-weight: bold;
+      margin-bottom: 10px;
     }
     
-    .status.loading {
-      background: #fef3c7;
-      color: #92400e;
+    .stat-label {
+      color: #6c757d;
+      font-weight: 600;
     }
     
-    .status.success {
-      background: #d1fae5;
-      color: #065f46;
+    .instruction {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      border-left: 5px solid #d63384;
     }
     
-    .status.error {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-    
-    @media (max-width: 480px) {
+    @media (max-width: 768px) {
       .container {
-        margin: 30px 5px 0;
-        padding: 15px;
-        border-radius: 10px;
+        margin: 10px;
+        padding: 20px;
       }
       
       h1 {
-        font-size: 1.3em;
+        font-size: 1.8em;
+      }
+      
+      .tabs {
+        flex-direction: column;
+      }
+      
+      .name-list {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
 </head>
 <body>
-  <div class="debug-banner" id="debugBanner">
-    📱 移动端检测中...
-  </div>
-
   <div class="container">
-    <h1>💃 舞蹈团截图收集 🌸</h1>
+    <h1>💃 舞蹈团截图收集管理系统 🌸</h1>
     
-    <div class="status loading" id="status">
-      🔄 正在检测设备和网络...
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('submit')">📸 提交截图</div>
+      <div class="tab" onclick="switchTab('manage')">📋 导入名单</div>
+      <div class="tab" onclick="switchTab('check')">✅ 提交状态</div>
     </div>
     
-    <div id="deviceInfo" style="font-size: 12px; color: #666; margin-top: 10px;"></div>
+    <!-- 提交截图页面 -->
+    <div id="submit" class="tab-content active">
+      <div class="instruction">
+        <h3 style="color: #d63384; margin-bottom: 10px;">📋 提交说明</h3>
+        <p>📸 点击下方按钮提交你的舞蹈截图</p>
+        <p>🎯 支持 JPG、PNG 格式，最大 20MB</p>
+        <p>✨ 所有截图会自动收集保存</p>
+      </div>
+      
+      <div class="form-container">
+        <a href="https://wj.qq.com/s2/23523995/5bd5/" class="submit-button" target="_blank">
+          📸 提交截图
+        </a>
+        
+        <a href="https://wj.qq.com/mine/" class="submit-button admin-button" target="_blank">
+          👀 查看收集结果
+        </a>
+      </div>
+      
+      <div class="instruction">
+        <h4 style="color: #495057;">💡 使用步骤：</h4>
+        <ol style="margin-top: 10px; padding-left: 20px; color: #495057;">
+          <li>点击"提交截图"按钮</li>
+          <li>填写你的姓名</li>
+          <li>选择并上传截图文件</li>
+          <li>点击提交完成</li>
+        </ol>
+      </div>
+    </div>
+    
+    <!-- 导入名单页面 -->
+    <div id="manage" class="tab-content">
+      <div class="instruction">
+        <h3 style="color: #d63384; margin-bottom: 10px;">📝 导入成员名单</h3>
+        <p>可以通过以下方式添加成员名单：</p>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h4 style="margin-bottom: 10px;">方式一：手动输入名单</h4>
+        <textarea id="nameList" placeholder="请输入成员姓名，每行一个，例如：&#10;张三&#10;李四&#10;王五"></textarea>
+        <div style="text-align: center;">
+          <button class="submit-button" onclick="saveNameList()">💾 保存名单</button>
+          <button class="submit-button admin-button" onclick="clearNameList()">🗑️ 清空名单</button>
+        </div>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h4 style="margin-bottom: 10px;">方式二：上传文件</h4>
+        <div class="file-input-wrapper">
+          <input type="file" id="nameFile" class="file-input" accept=".txt,.csv" onchange="loadNameFile()">
+          <button class="file-input-button" onclick="document.getElementById('nameFile').click()">
+            📁 选择名单文件 (txt/csv)
+          </button>
+        </div>
+        <p style="color: #6c757d; font-size: 0.9em;">支持 .txt 或 .csv 文件，每行一个姓名</p>
+      </div>
+    </div>
+    
+    <!-- 提交状态页面 -->
+    <div id="check" class="tab-content">
+      <div class="instruction">
+        <h3 style="color: #d63384; margin-bottom: 10px;">📊 提交状态统计</h3>
+        <p>手动更新已提交人员名单，系统会自动对比显示未提交人员</p>
+      </div>
+      
+      <div style="margin: 20px 0;">
+        <h4 style="margin-bottom: 10px;">输入已提交人员名单：</h4>
+        <textarea id="submittedList" placeholder="请输入已提交截图的成员姓名，每行一个，例如：&#10;张三&#10;李四"></textarea>
+        <div style="text-align: center;">
+          <button class="submit-button" onclick="updateSubmissionStatus()">🔄 更新状态</button>
+        </div>
+      </div>
+      
+      <div class="stats" id="stats" style="display: none;">
+        <div class="stat-card">
+          <div class="stat-number" style="color: #d63384;" id="totalCount">0</div>
+          <div class="stat-label">总人数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: #28a745;" id="submittedCount">0</div>
+          <div class="stat-label">已提交</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: #dc3545;" id="notSubmittedCount">0</div>
+          <div class="stat-label">未提交</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: #007bff;" id="submissionRate">0%</div>
+          <div class="stat-label">提交率</div>
+        </div>
+      </div>
+      
+      <div id="statusDisplay"></div>
+    </div>
   </div>
 
   <script>
-    console.log('脚本开始执行...');
+    // Cherry爱心特效
+    function createCherry() {
+      const cherries = ['🍒', '💖', '🌸', '💕', '🎀'];
+      const cherry = document.createElement('div');
+      cherry.className = 'cherry';
+      cherry.innerHTML = cherries[Math.floor(Math.random() * cherries.length)];
+      cherry.style.left = Math.random() * window.innerWidth + 'px';
+      cherry.style.top = '-50px';
+      document.body.appendChild(cherry);
+      
+      let pos = -50;
+      const speed = 2 + Math.random() * 3;
+      const sway = Math.random() * 2 - 1;
+      
+      const animation = setInterval(() => {
+        pos += speed;
+        cherry.style.top = pos + 'px';
+        cherry.style.left = (parseFloat(cherry.style.left) + sway) + 'px';
+        
+        if (pos > window.innerHeight) {
+          clearInterval(animation);
+          cherry.remove();
+        }
+      }, 50);
+    }
     
-    // 设备信息检测
-    function getDeviceInfo() {
-      const info = {
-        userAgent: navigator.userAgent,
-        platform: navigator.platform,
-        language: navigator.language,
-        cookieEnabled: navigator.cookieEnabled,
-        onLine: navigator.onLine,
-        screen: `${screen.width}x${screen.height}`,
-        window: `${window.innerWidth}x${window.innerHeight}`,
-        protocol: location.protocol,
-        host: location.host
+    setInterval(createCherry, 2000);
+    
+    // 标签页切换
+    function switchTab(tabName) {
+      // 隐藏所有标签页内容
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // 移除所有标签的活跃状态
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // 显示选中的标签页
+      document.getElementById(tabName).classList.add('active');
+      event.target.classList.add('active');
+    }
+    
+    // 保存名单
+    function saveNameList() {
+      const nameList = document.getElementById('nameList').value;
+      if (!nameList.trim()) {
+        alert('请输入成员名单！');
+        return;
+      }
+      
+      const names = nameList.split('\n').filter(name => name.trim()).map(name => name.trim());
+      localStorage.setItem('memberList', JSON.stringify(names));
+      alert(`已保存 ${names.length} 个成员名单！`);
+    }
+    
+    // 清空名单
+    function clearNameList() {
+      if (confirm('确定要清空名单吗？')) {
+        document.getElementById('nameList').value = '';
+        localStorage.removeItem('memberList');
+        alert('名单已清空！');
+      }
+    }
+    
+    // 加载名单文件
+    function loadNameFile() {
+      const file = document.getElementById('nameFile').files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const content = e.target.result;
+        const names = content.split(/[\r\n,]+/).filter(name => name.trim()).map(name => name.trim());
+        document.getElementById('nameList').value = names.join('\n');
+        alert(`已加载 ${names.length} 个姓名！请点击"保存名单"确认保存。`);
       };
-      return info;
+      reader.readAsText(file);
     }
     
-    // 更新调试信息
-    function updateDebug() {
-      const info = getDeviceInfo();
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    // 更新提交状态
+    function updateSubmissionStatus() {
+      const memberList = JSON.parse(localStorage.getItem('memberList') || '[]');
+      const submittedText = document.getElementById('submittedList').value;
       
-      document.getElementById('debugBanner').innerHTML = 
-        `📱 ${isMobile ? '移动设备' : '桌面设备'} | ${info.onLine ? '在线' : '离线'} | ${info.protocol}`;
+      if (memberList.length === 0) {
+        alert('请先在"导入名单"页面添加成员名单！');
+        return;
+      }
       
-      document.getElementById('deviceInfo').innerHTML = `
-        <strong>设备信息：</strong><br>
-        平台: ${info.platform}<br>
-        屏幕: ${info.screen}<br>
-        窗口: ${info.window}<br>
-        协议: ${info.protocol}<br>
-        网络: ${info.onLine ? '已连接' : '未连接'}<br>
-        Cookie: ${info.cookieEnabled ? '启用' : '禁用'}
-      `;
+      const submittedNames = submittedText.split('\n')
+        .filter(name => name.trim())
+        .map(name => name.trim());
       
-      console.log('设备信息:', info);
+      const notSubmitted = memberList.filter(name => !submittedNames.includes(name));
+      const submitted = memberList.filter(name => submittedNames.includes(name));
+      
+      // 更新统计数据
+      document.getElementById('totalCount').textContent = memberList.length;
+      document.getElementById('submittedCount').textContent = submitted.length;
+      document.getElementById('notSubmittedCount').textContent = notSubmitted.length;
+      document.getElementById('submissionRate').textContent = 
+        Math.round((submitted.length / memberList.length) * 100) + '%';
+      
+      document.getElementById('stats').style.display = 'grid';
+      
+      // 显示详细状态
+      let html = '<div style="margin-top: 30px;">';
+      
+      if (submitted.length > 0) {
+        html += '<h4 style="color: #28a745; margin-bottom: 15px;">✅ 已提交 (' + submitted.length + '人)</h4>';
+        html += '<div class="name-list">';
+        submitted.forEach(name => {
+          html += `<div class="name-item submitted">✅ ${name}</div>`;
+        });
+        html += '</div>';
+      }
+      
+      if (notSubmitted.length > 0) {
+        html += '<h4 style="color: #dc3545; margin-bottom: 15px; margin-top: 30px;">❌ 未提交 (' + notSubmitted.length + '人)</h4>';
+        html += '<div class="name-list">';
+        notSubmitted.forEach(name => {
+          html += `<div class="name-item not-submitted">❌ ${name}</div>`;
+        });
+        html += '</div>';
+      }
+      
+      html += '</div>';
+      document.getElementById('statusDisplay').innerHTML = html;
     }
     
-    // 页面加载完成
+    // 页面加载时恢复数据
     window.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM 加载完成');
-      updateDebug();
-      
-      document.getElementById('status').innerHTML = '✅ 页面加载成功！移动端可以正常访问';
-      document.getElementById('status').className = 'status success';
-      
-      // 3秒后尝试加载主应用
-      setTimeout(function() {
-        document.getElementById('status').innerHTML = '🚀 准备加载完整应用...';
-        loadMainApp();
-      }, 3000);
+      const savedList = localStorage.getItem('memberList');
+      if (savedList) {
+        const names = JSON.parse(savedList);
+        document.getElementById('nameList').value = names.join('\n');
+      }
     });
-    
-    function loadMainApp() {
-      document.getElementById('status').innerHTML = '🎉 移动端测试成功！可以开始使用了';
-      console.log('测试完成，移动端正常工作');
-    }
-    
-    // 错误处理
-    window.addEventListener('error', function(e) {
-      console.error('页面错误:', e);
-      document.getElementById('status').innerHTML = '❌ 发生错误: ' + e.message;
-      document.getElementById('status').className = 'status error';
-    });
-    
-    console.log('脚本设置完成');
   </script>
 </body>
 </html>
