@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>舞蹈团截图收集</title>
+  <style>
+    body { font-family: sans-serif; padding: 1rem; background: #f5f7fa; }
+    h1 { text-align: center; color: #333; }
+    form, .admin, .login-box { background: #fff; padding: 1rem; border-radius: 8px;
+           box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+    label { display: block; margin: 0.5rem 0 0.2rem; font-weight: bold; }
+    input[type="text"], input[type="password"], input[type="file"] {
+      width: 100%; padding: 0.5rem; margin-bottom: 1rem;
+      border: 1px solid #ccc; border-radius: 4px;
+    }
+    button {
+      background: #4CAF50; color: white; border: none;
+      padding: 0.7rem 1.2rem; border-radius: 4px; cursor: pointer; font-weight: bold;
+    }
+    button:hover { background: #45a049; }
+    #status { margin-top: 1rem; }
+    .admin { display: none; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+    .gallery div { background: #fafafa; padding: 0.5rem; border-radius: 6px; text-align: center; }
+    .gallery img { max-width: 100%; border-radius: 4px; }
+    .submitted, .pending { margin-top: 1rem; }
+    .pending { background: #ffecec; padding: 0.5rem; border-radius: 6px; }
+    .submitted { background: #eaffea; padding: 0.5rem; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>舞蹈团截图收集</h1>
+
+  <!-- 用户提交表单 -->
+  <form id="uploadForm">
+    <label for="name">姓名：</label>
+    <input type="text" id="name" required>
+
+    <label for="file">上传截图：</label>
+    <input type="file" id="file" accept="image/*" required>
+
+    <button type="submit">提交</button>
+  </form>
+
+  <div id="status"></div>
+
+  <!-- 管理员登录 -->
+  <div class="login-box" id="loginBox">
+    <h3>管理员登录</h3>
+    <input type="password" id="adminPass" placeholder="输入管理员密码">
+    <button onclick="checkAdmin()">进入后台</button>
+  </div>
+
+  <!-- 管理员页面 -->
+  <div class="admin" id="adminPanel">
+    <h2>管理员后台</h2>
+    <button onclick="loadSubmissions()">刷新数据</button>
+    <button onclick="downloadAll()">批量下载</button>
+    <div id="adminStatus"></div>
+
+    <h3>✅ 已提交</h3>
+    <div class="submitted" id="submittedList"></div>
+
+    <h3>❌ 未提交</h3>
+    <div class="pending" id="pendingList"></div>
+
+    <h3>截图画廊</h3>
+    <div class="gallery" id="gallery"></div>
+  </div>
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script>
+    // Supabase 配置
+    const SUPABASE_URL = "https://yeypsjhfmmamfxajnias.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlleXBzamhmbW1hbWZ4YWpuaWFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0ODYzMzUsImV4cCI6MjA3MTA2MjMzNX0.lnebqcmjeyKbb1qFm0r9YN0HdWLKC9Wtaz45dLd2lqY";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // 固定名单（请在这里修改成你们舞蹈团的真实名单）
+    const FULL_LIST = [
+      "小明", "小红", "小芳", "小刚", "小丽",
+      "小强", "小美", "小杰", "小慧", "小军",
+      "小涛", "小雪", "小乐", "小龙", "小宇",
+      "小静", "小安", "小华", "小燕", "小东"
+    ];
+
+    // 上传表单
+    const form = document.getElementById("uploadForm");
+    const statusDiv = document.getElementById("status");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const file = document.getElementById("file").files[0];
+
+      if (!name || !file) {
+        statusDiv.innerText = "请填写姓名并选择图片";
+        return;
+      }
+
+      const filePath = `${Date.now()}_${file.name}`;
+      let { error: uploadError } = await supabase.storage
+        .from("screenshots")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        statusDiv.innerText = "上传失败：" + uploadError.message;
+        return;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("screenshots")
+        .getPublicUrl(filePath);
+
+      const imageUrl = publicUrlData.publicUrl;
+
+      let { error: insertError } = await supabase
+        .from("submissions")
+        .insert([{ name: name, image_url: imageUrl }]);
+
+      if (insertError) {
+        statusDiv.innerText = "保存数据库失败：" + insertError.message;
+      } else {
+        statusDiv.innerText = "提交成功！🎉";
+        form.reset();
+      }
+    });
+
+    // 管理员逻辑
+    const loginBox = document.getElementById("loginBox");
+    const adminPanel = document.getElementById("adminPanel");
+    const gallery = document.getElementById("gallery");
+    const submittedList = document.getElementById("submittedList");
+    const pendingList = document.getElementById("pendingList");
+    const adminStatus = document.getElementById("adminStatus");
+    const ADMIN_PASS = "danceadmin"; // 修改成你自己的密码
+
+    function checkAdmin() {
+      const inputPass = document.getElementById("adminPass").value;
+      if (inputPass === ADMIN_PASS) {
+        loginBox.style.display = "none";
+        adminPanel.style.display = "block";
+        loadSubmissions();
+      } else {
+        alert("密码错误");
+      }
+    }
+
+    async function loadSubmissions() {
+      adminStatus.innerText = "加载中...";
+      let { data, error } = await supabase
+        .from("submissions")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        adminStatus.innerText = "获取数据失败：" + error.message;
+        return;
+      }
+
+      adminStatus.innerText = `共 ${data.length} 条提交`;
+
+      // 已提交名单
+      const submittedNames = data.map(d => d.name);
+      const pendingNames = FULL_LIST.filter(n => !submittedNames.includes(n));
+
+      submittedList.innerHTML = submittedNames.map(n => `<span>✅ ${n}</span>`).join("<br>");
+      pendingList.innerHTML = pendingNames.length > 0
+        ? pendingNames.map(n => `<span>❌ ${n}</span>`).join("<br>")
+        : "全部已提交 ✅";
+
+      // 渲染截图画廊
+      gallery.innerHTML = "";
+      data.forEach(row => {
+        let div = document.createElement("div");
+        div.innerHTML = `<p>${row.name}</p><img src="${row.image_url}" alt="screenshot">`;
+        gallery.appendChild(div);
+      });
+    }
+
+    // 批量下载
+    async function downloadAll() {
+      let { data, error } = await supabase.from("submissions").select("*");
+      if (error) { alert("获取数据失败"); return; }
+
+      const links = data.map(d => d.image_url);
+      const zip = new JSZip();
+
+      for (let i = 0; i < links.length; i++) {
+        const url = links[i];
+        const response = await fetch(url);
+        const blob = await response.blob();
+        zip.file(`screenshot_${i+1}.jpg`, blob);
+      }
+
+      zip.generateAsync({type:"blob"}).then(content => {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(content);
+        link.download = "screenshots.zip";
+        link.click();
+      });
+    }
+  </script>
+</body>
+</html>
