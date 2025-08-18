@@ -91,14 +91,14 @@
     
     .tab {
       flex: 1;
-      min-width: 100px;
-      padding: 15px 8px;
+      min-width: 120px;
+      padding: 15px 10px;
       text-align: center;
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.3s ease;
       font-weight: 600;
-      font-size: 0.85em;
+      font-size: 0.9em;
     }
     
     .tab.active {
@@ -154,10 +154,6 @@
       background: linear-gradient(45deg, #dc3545, #c82333) !important;
     }
     
-    .archive-button {
-      background: linear-gradient(45deg, #6f42c1, #5a2d91) !important;
-    }
-    
     input[type="text"], input[type="file"], textarea {
       width: 100%;
       padding: 15px;
@@ -211,12 +207,6 @@
       background: rgba(214, 51, 132, 0.15);
       border-color: #c02a5e;
       transform: scale(1.02);
-    }
-    
-    .upload-area.disabled {
-      border-color: #6c757d;
-      background: rgba(108, 117, 125, 0.1);
-      cursor: not-allowed;
     }
     
     .image-preview {
@@ -316,13 +306,6 @@
       border-left: 5px solid #d63384;
     }
     
-    .submission-list {
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 15px;
-      padding: 20px;
-      margin: 20px 0;
-    }
-    
     .submission-item {
       border: 1px solid #dee2e6;
       border-radius: 10px;
@@ -355,66 +338,6 @@
       cursor: pointer;
     }
     
-    .archive-item {
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 12px;
-      padding: 20px;
-      margin: 15px 0;
-      transition: all 0.3s ease;
-    }
-    
-    .archive-item:hover {
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      transform: translateY(-2px);
-    }
-    
-    .archive-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    
-    .archive-title {
-      font-weight: bold;
-      color: #495057;
-      font-size: 1.1em;
-    }
-    
-    .archive-date {
-      color: #6c757d;
-      font-size: 0.9em;
-    }
-    
-    .archive-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      gap: 10px;
-      margin: 15px 0;
-    }
-    
-    .archive-stat {
-      text-align: center;
-      padding: 10px;
-      background: white;
-      border-radius: 8px;
-      border: 1px solid #e9ecef;
-    }
-    
-    .archive-stat-number {
-      font-weight: bold;
-      font-size: 1.3em;
-      color: #495057;
-    }
-    
-    .archive-stat-label {
-      font-size: 0.8em;
-      color: #6c757d;
-    }
-    
     .alert {
       padding: 15px;
       border-radius: 12px;
@@ -438,12 +361,6 @@
       background: #d1ecf1;
       color: #0c5460;
       border: 1px solid #bee5eb;
-    }
-    
-    .alert-danger {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
     }
     
     .loading {
@@ -470,13 +387,6 @@
       margin: 20px 0;
     }
     
-    .divider {
-      height: 2px;
-      background: linear-gradient(45deg, #d63384, #dc3545);
-      margin: 30px 0;
-      border-radius: 2px;
-    }
-    
     @media (max-width: 768px) {
       .container {
         margin: 10px;
@@ -493,7 +403,6 @@
       
       .tab {
         margin: 2px 0;
-        min-width: auto;
       }
       
       .name-list {
@@ -537,106 +446,49 @@
     
     <!-- 当前活动信息 -->
     <div class="activity-info">
-      <div class="activity-title" id="currentActivityTitle">当前收集活动</div>
+      <div class="activity-title" id="currentActivityTitle">舞蹈截图收集</div>
       <div class="activity-status">
-        <div id="activityStats">等待设置活动</div>
-        <div class="status-badge" id="activityStatus">未开始</div>
+        <div id="activityStats">等待开始收集</div>
+        <div class="status-badge" id="activityStatus">准备中</div>
       </div>
     </div>
     
     <div class="tabs">
       <div class="tab active" onclick="switchTab('submit')">📸 提交截图</div>
-      <div class="tab" onclick="switchTab('setup')">⚙️ 活动管理</div>
-      <div class="tab" onclick="switchTab('manage')">📋 成员名单</div>
-      <div class="tab" onclick="switchTab('check')">✅ 统计状态</div>
-      <div class="tab" onclick="switchTab('gallery')">🖼️ 图片库</div>
-      <div class="tab" onclick="switchTab('archive')">📚 历史档案</div>
+      <div class="tab" onclick="switchTab('manage')">📋 管理名单</div>
+      <div class="tab" onclick="switchTab('check')">✅ 查看统计</div>
+      <div class="tab" onclick="switchTab('gallery')">🖼️ 所有图片</div>
+      <div class="tab" onclick="switchTab('settings')">⚙️ 数据管理</div>
     </div>
     
     <!-- 提交截图页面 -->
     <div id="submit" class="tab-content active">
       <div class="instruction">
-        <h3 style="color: #d63384; margin-bottom: 10px;">📋 提交说明</h3>
-        <p>📸 请上传你的舞蹈截图</p>
-        <p>🎯 支持 JPG、PNG 格式，单个文件不超过5MB</p>
-        <p>✨ 可以一次选择多张图片</p>
+        <h3 style="color: #d63384; margin-bottom: 10px;">📋 提交截图说明</h3>
+        <p>📝 请先输入你的姓名，然后选择截图上传</p>
+        <p>📸 支持 JPG、PNG 格式，可以一次选择多张图片</p>
+        <p>🎯 确保图片清晰，动作到位</p>
       </div>
       
-      <div id="submitFormArea">
-        <div class="form-group">
-          <label for="submitterName">你的姓名：</label>
-          <input type="text" id="submitterName" placeholder="请输入你的姓名">
-        </div>
-        
-        <div class="upload-area" id="uploadArea" onclick="document.getElementById('imageInput').click()" 
-             ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
-          <div style="font-size: 3em; color: #d63384; margin-bottom: 15px;">📸</div>
-          <div style="font-size: 1.2em; color: #495057; margin-bottom: 10px;">点击选择图片或拖拽到此处</div>
-          <div style="color: #6c757d;">支持多选，JPG/PNG格式</div>
-          <input type="file" id="imageInput" accept="image/*" multiple style="display: none;" onchange="handleFileSelect(event)">
-        </div>
-        
-        <div id="imagePreview" class="image-preview"></div>
-        
-        <div class="action-group">
-          <button class="submit-button" id="submitBtn" onclick="submitImages()">
-            📤 提交图片
-          </button>
-        </div>
+      <div class="form-group">
+        <label for="submitterName">🎭 你的姓名：</label>
+        <input type="text" id="submitterName" placeholder="请输入你的姓名（必填）">
       </div>
       
-      <div id="submitClosedArea" style="display: none;">
-        <div class="alert alert-warning">
-          <h4>活动已结束</h4>
-          <p>当前活动已结束，无法提交新的图片。请等待下一次活动开启。</p>
-        </div>
-      </div>
-    </div>
-    
-    <!-- 活动管理页面 -->
-    <div id="setup" class="tab-content">
-      <div class="instruction">
-        <h3 style="color: #d63384; margin-bottom: 10px;">⚙️ 活动生命周期管理</h3>
-        <p>管理活动的开始、进行和结束，确保系统的可持续使用</p>
+      <div class="upload-area" onclick="handleUploadClick()" 
+           ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+        <div style="font-size: 3em; color: #d63384; margin-bottom: 15px;">📸</div>
+        <div style="font-size: 1.2em; color: #495057; margin-bottom: 10px;">点击选择图片或拖拽到此处</div>
+        <div style="color: #6c757d;">支持多选，JPG/PNG格式</div>
+        <input type="file" id="imageInput" accept="image/*" multiple style="display: none;" onchange="handleFileSelect(event)">
       </div>
       
-      <div id="newActivityArea">
-        <h4 style="color: #495057; margin-bottom: 15px;">🆕 创建新活动</h4>
-        
-        <div class="form-group">
-          <label for="activityTitle">活动标题：</label>
-          <input type="text" id="activityTitle" placeholder="例如：第三次舞蹈练习截图收集">
-        </div>
-        
-        <div class="form-group">
-          <label for="activityDesc">活动说明：</label>
-          <textarea id="activityDesc" placeholder="例如：请上传本周舞蹈练习的截图，要求动作清晰..."></textarea>
-        </div>
-        
-        <div class="action-group">
-          <button class="submit-button" onclick="startNewActivity()">🚀 开始新活动</button>
-        </div>
-      </div>
+      <div id="imagePreview" class="image-preview"></div>
       
-      <div id="activeActivityArea" style="display: none;">
-        <h4 style="color: #495057; margin-bottom: 15px;">🎯 当前活动管理</h4>
-        
-        <div class="alert alert-info">
-          <strong>活动进行中</strong><br>
-          <span id="currentActivityInfo"></span>
-        </div>
-        
-        <div class="action-group">
-          <button class="submit-button warning-button" onclick="pauseActivity()">⏸️ 暂停收集</button>
-          <button class="submit-button secondary-button" onclick="resumeActivity()" id="resumeBtn" style="display: none;">▶️ 恢复收集</button>
-          <button class="submit-button archive-button" onclick="finishActivity()">📦 结束并归档</button>
-          <button class="submit-button danger-button" onclick="cancelActivity()">❌ 取消活动</button>
-        </div>
-        
-        <div class="divider"></div>
-        
-        <h4 style="color: #495057; margin-bottom: 15px;">📊 当前数据概览</h4>
-        <div id="activityOverview"></div>
+      <div class="action-group">
+        <button class="submit-button" id="submitBtn" onclick="submitImages()">
+          📤 提交截图
+        </button>
       </div>
     </div>
     
@@ -644,33 +496,33 @@
     <div id="manage" class="tab-content">
       <div class="instruction">
         <h3 style="color: #d63384; margin-bottom: 10px;">📝 管理成员名单</h3>
-        <p>设置参与本次活动的成员名单</p>
+        <p>💡 在这里输入所有参与活动的成员名单，系统会自动统计谁还没有提交</p>
       </div>
       
       <div class="form-group">
-        <label for="nameList">成员名单（每行一个姓名）：</label>
-        <textarea id="nameList" placeholder="张三&#10;李四&#10;王五&#10;小红&#10;小明"></textarea>
+        <label for="nameList">👥 成员名单（每行一个姓名）：</label>
+        <textarea id="nameList" placeholder="张三&#10;李四&#10;王五&#10;小红&#10;小明&#10;..."></textarea>
       </div>
       
       <div class="action-group">
         <button class="submit-button" onclick="saveNameList()">💾 保存名单</button>
-        <button class="submit-button secondary-button" onclick="loadTemplate()">📋 加载常用名单</button>
+        <button class="submit-button secondary-button" onclick="loadTemplate()">📋 使用上次名单</button>
         <button class="submit-button warning-button" onclick="clearNameList()">🗑️ 清空名单</button>
       </div>
       
       <div id="nameListDisplay"></div>
     </div>
     
-    <!-- 统计状态页面 -->
+    <!-- 查看统计页面 -->
     <div id="check" class="tab-content">
       <div class="instruction">
-        <h3 style="color: #d63384; margin-bottom: 10px;">📊 提交状态统计</h3>
-        <p>实时查看当前活动的提交情况统计</p>
+        <h3 style="color: #d63384; margin-bottom: 10px;">📊 提交统计</h3>
+        <p>🔍 实时查看提交情况，一目了然谁已提交、谁还没提交</p>
       </div>
       
       <div class="action-group">
-        <button class="submit-button" onclick="updateSubmissionStatus()">🔄 刷新统计</button>
-        <button class="submit-button secondary-button" onclick="exportCurrentData()">📤 导出当前数据</button>
+        <button class="submit-button" onclick="refreshStats()">🔄 刷新统计</button>
+        <button class="submit-button secondary-button" onclick="exportStats()">📤 导出统计</button>
       </div>
       
       <div class="stats" id="stats">
@@ -695,35 +547,50 @@
       <div id="statusDisplay"></div>
     </div>
     
-    <!-- 图片库页面 -->
+    <!-- 所有图片页面 -->
     <div id="gallery" class="tab-content">
       <div class="instruction">
-        <h3 style="color: #d63384; margin-bottom: 10px;">🖼️ 当前活动图片</h3>
-        <p>查看当前活动收集的所有截图</p>
+        <h3 style="color: #d63384; margin-bottom: 10px;">🖼️ 所有收集的截图</h3>
+        <p>📱 查看、下载所有同学提交的截图</p>
       </div>
       
       <div class="action-group">
-        <button class="submit-button secondary-button" onclick="downloadCurrentImages()">📥 下载图片</button>
-        <button class="submit-button warning-button" onclick="clearCurrentImages()">🗑️ 清空图片</button>
+        <button class="submit-button secondary-button" onclick="downloadAllImages()">📥 批量下载</button>
+        <button class="submit-button warning-button" onclick="clearSelectedImages()">🗑️ 删除选中</button>
       </div>
       
       <div id="submissionsList"></div>
     </div>
     
-    <!-- 历史档案页面 -->
-    <div id="archive" class="tab-content">
+    <!-- 数据管理页面 -->
+    <div id="settings" class="tab-content">
       <div class="instruction">
-        <h3 style="color: #d63384; margin-bottom: 10px;">📚 历史活动档案</h3>
-        <p>查看所有已结束的活动记录和数据</p>
+        <h3 style="color: #d63384; margin-bottom: 10px;">⚙️ 数据管理</h3>
+        <p>🧹 管理系统数据，准备新的收集活动</p>
       </div>
       
-      <div class="action-group">
-        <button class="submit-button warning-button" onclick="clearAllArchives()">🗑️ 清空所有档案</button>
+      <div style="background: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 15px; margin: 20px 0;">
+        <h4 style="color: #495057; margin-bottom: 15px;">📋 当前数据概览</h4>
+        <div id="dataOverview"></div>
       </div>
       
-      <div id="archiveDisplay">
-        <div style="text-align: center; color: #6c757d; padding: 40px;">
-          暂无历史档案
+      <div style="background: rgba(255, 243, 205, 0.9); padding: 20px; border-radius: 15px; margin: 20px 0; border: 1px solid #ffc107;">
+        <h4 style="color: #856404; margin-bottom: 15px;">🔄 开始新收集</h4>
+        <p style="color: #856404; margin-bottom: 15px;">建议：完成一次收集后，导出数据再清空，为下次收集做准备</p>
+        
+        <div class="action-group">
+          <button class="submit-button secondary-button" onclick="exportAllData()">📤 导出所有数据</button>
+          <button class="submit-button danger-button" onclick="clearAllData()">🗑️ 清空所有数据</button>
+        </div>
+      </div>
+      
+      <div style="background: rgba(248, 215, 218, 0.9); padding: 20px; border-radius: 15px; margin: 20px 0; border: 1px solid #dc3545;">
+        <h4 style="color: #721c24; margin-bottom: 15px;">⚠️ 危险操作</h4>
+        <p style="color: #721c24; margin-bottom: 15px;">以下操作将永久删除数据，请谨慎操作</p>
+        
+        <div class="action-group">
+          <button class="submit-button warning-button" onclick="clearSubmissions()">🗑️ 只清空提交记录</button>
+          <button class="submit-button warning-button" onclick="clearNameListOnly()">🗑️ 只清空名单</button>
         </div>
       </div>
     </div>
@@ -775,23 +642,33 @@
       event.target.classList.add('active');
       
       // 切换到相应页面时更新显示
-      if (tabName === 'setup') {
-        updateActivityManagement();
-      } else if (tabName === 'manage') {
+      if (tabName === 'manage') {
         displayCurrentNameList();
       } else if (tabName === 'check') {
-        updateSubmissionStatus();
+        refreshStats();
       } else if (tabName === 'gallery') {
-        displayCurrentSubmissions();
-      } else if (tabName === 'archive') {
-        displayArchives();
+        displaySubmissions();
+      } else if (tabName === 'settings') {
+        updateDataOverview();
       }
+    }
+    
+    // 处理上传点击
+    function handleUploadClick() {
+      const name = document.getElementById('submitterName').value.trim();
+      if (!name) {
+        alert('请先输入你的姓名！');
+        document.getElementById('submitterName').focus();
+        return;
+      }
+      document.getElementById('imageInput').click();
     }
     
     // 文件拖拽处理
     function handleDragOver(e) {
       e.preventDefault();
-      if (!isActivityActive()) return;
+      const name = document.getElementById('submitterName').value.trim();
+      if (!name) return;
       e.target.closest('.upload-area').classList.add('dragover');
     }
     
@@ -801,23 +678,22 @@
     
     function handleDrop(e) {
       e.preventDefault();
-      if (!isActivityActive()) return;
       e.target.closest('.upload-area').classList.remove('dragover');
+      
+      const name = document.getElementById('submitterName').value.trim();
+      if (!name) {
+        alert('请先输入你的姓名！');
+        return;
+      }
+      
       const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
       addFiles(files);
     }
     
     // 文件选择处理
     function handleFileSelect(e) {
-      if (!isActivityActive()) return;
       const files = Array.from(e.target.files);
       addFiles(files);
-    }
-    
-    // 检查活动是否激活
-    function isActivityActive() {
-      const activity = JSON.parse(localStorage.getItem('currentActivity') || '{}');
-      return activity.status === 'active';
     }
     
     // 添加文件到预览
@@ -864,11 +740,6 @@
     
     // 提交图片
     function submitImages() {
-      if (!isActivityActive()) {
-        alert('当前活动未开始或已结束！');
-        return;
-      }
-      
       const name = document.getElementById('submitterName').value.trim();
       
       if (!name) {
@@ -877,7 +748,7 @@
       }
       
       if (selectedFiles.length === 0) {
-        alert('请选择要上传的图片！');
+        alert('请选择要上传的截图！');
         return;
       }
       
@@ -907,22 +778,22 @@
             
             processed++;
             if (processed === selectedFiles.length) {
-              // 保存到当前活动
-              const submissions = JSON.parse(localStorage.getItem('currentSubmissions') || '[]');
+              // 保存提交记录
+              const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
               
               // 检查是否已经提交过
               const existingIndex = submissions.findIndex(s => s.name === name);
               if (existingIndex >= 0) {
                 // 更新现有提交
                 submissions[existingIndex] = submission;
-                showAlert('success', `更新成功！已更新 ${name} 的 ${submission.images.length} 张图片`);
+                showAlert('success', `更新成功！已更新 ${name} 的 ${submission.images.length} 张截图`);
               } else {
                 // 新增提交
                 submissions.push(submission);
-                showAlert('success', `提交成功！已收到 ${name} 的 ${submission.images.length} 张图片`);
+                showAlert('success', `提交成功！已收到 ${name} 的 ${submission.images.length} 张截图`);
               }
               
-              localStorage.setItem('currentSubmissions', JSON.stringify(submissions));
+              localStorage.setItem('submissions', JSON.stringify(submissions));
               
               // 重置表单
               selectedFiles = [];
@@ -931,7 +802,7 @@
               updateImagePreview();
               
               submitBtn.disabled = false;
-              submitBtn.innerHTML = '📤 提交图片';
+              submitBtn.innerHTML = '📤 提交截图';
               
               updateActivityStats();
             }
@@ -939,265 +810,6 @@
           reader.readAsDataURL(file);
         });
       }, 1000);
-    }
-    
-    // 开始新活动
-    function startNewActivity() {
-      const title = document.getElementById('activityTitle').value.trim();
-      const desc = document.getElementById('activityDesc').value.trim();
-      
-      if (!title) {
-        alert('请填写活动标题！');
-        return;
-      }
-      
-      // 检查是否有进行中的活动
-      const currentActivity = JSON.parse(localStorage.getItem('currentActivity') || '{}');
-      if (currentActivity.status === 'active') {
-        if (!confirm('当前有活动正在进行中，开始新活动将结束当前活动。确定继续吗？')) {
-          return;
-        }
-        // 自动归档当前活动
-        finishActivity(false);
-      }
-      
-      const activity = {
-        id: Date.now(),
-        title: title,
-        description: desc,
-        startDate: new Date().toLocaleString(),
-        status: 'active'
-      };
-      
-      localStorage.setItem('currentActivity', JSON.stringify(activity));
-      localStorage.removeItem('currentSubmissions'); // 清空之前的提交记录
-      
-      updateActivityDisplay();
-      updateActivityManagement();
-      
-      // 清空输入框
-      document.getElementById('activityTitle').value = '';
-      document.getElementById('activityDesc').value = '';
-      
-      showAlert('success', '新活动已开始！');
-    }
-    
-    // 暂停活动
-    function pauseActivity() {
-      const activity = JSON.parse(localStorage.getItem('currentActivity') || '{}');
-      if (activity.status === 'active') {
-        activity.status = 'paused';
-        localStorage.setItem('currentActivity', JSON.stringify(activity));
-        updateActivityDisplay();
-        updateActivityManagement();
-        updateSubmitArea();
-        showAlert('warning', '活动已暂停，停止接收新的提交');
-      }
-    }
-    
-    // 恢复活动
-    function resumeActivity() {
-      const activity = JSON.parse(localStorage.getItem('currentActivity') || '{}');
-      if (activity.status === 'paused') {
-        activity.status = 'active';
-        localStorage.setItem('currentActivity', JSON.stringify(activity));
-        updateActivityDisplay();
-        updateActivityManagement();
-        updateSubmitArea();
-        showAlert('success', '活动已恢复，可以继续提交');
-      }
-    }
-    
-    // 结束活动并归档
-    function finishActivity(showConfirm = true) {
-      if (showConfirm && !confirm('确定要结束当前活动并归档吗？归档后将无法继续提交。')) {
-        return;
-      }
-      
-      const activity = JSON.parse(localStorage.getItem('currentActivity') || '{}');
-      const submissions = JSON.parse(localStorage.getItem('currentSubmissions') || '[]');
-      const nameList = JSON.parse(localStorage.getItem('currentNameList') || '[]');
-      
-      if (!activity.title) {
-        alert('没有进行中的活动！');
-        return;
-      }
-      
-      // 创建档案记录
-      const archive = {
-        id: activity.id,
-        title: activity.title,
-        description: activity.description,
-        startDate: activity.startDate,
-        endDate: new Date().toLocaleString(),
-        totalMembers: nameList.length,
-        submittedCount: submissions.length,
-        submissionRate: nameList.length > 0 ? Math.round((submissions.length / nameList.length) * 100) : 0,
-        submissions: submissions,
-        nameList: nameList
-      };
-      
-      // 保存到档案
-      const archives = JSON.parse(localStorage.getItem('activityArchives') || '[]');
-      archives.unshift(archive); // 添加到开头
-      
-      // 保留最近10个档案
-      if (archives.length > 10) {
-        archives.splice(10);
-      }
-      
-      localStorage.setItem('activityArchives', JSON.stringify(archives));
-      
-      // 清理当前活动数据
-      localStorage.removeItem('currentActivity');
-      localStorage.removeItem('currentSubmissions');
-      localStorage.removeItem('currentNameList');
-      
-      updateActivityDisplay();
-      updateActivityManagement();
-      updateSubmitArea();
-      
-      if (showConfirm) {
-        showAlert('success', '活动已结束并归档！可以开始新的活动了');
-      }
-    }
-    
-    // 取消活动
-    function cancelActivity() {
-      if (!confirm('确定要取消当前活动吗？所有数据将被删除且无法恢复！')) {
-        return;
-      }
-      
-      localStorage.removeItem('currentActivity');
-      localStorage.removeItem('currentSubmissions');
-      localStorage.removeItem('currentNameList');
-      
-      updateActivityDisplay();
-      updateActivityManagement();
-      updateSubmitArea();
-      
-      showAlert('warning', '活动已取消，所有数据已清空');
-    }
-    
-    // 更新活动管理界面
-    function updateActivityManagement() {
-      const activity = JSON.parse(localStorage.getItem('currentActivity') || '{}');
-      const newActivityArea = document.getElementById('newActivityArea');
-      const activeActivityArea = document.getElementById('activeActivityArea');
-      const resumeBtn = document.getElementById('resumeBtn');
-      
-      if (activity.status === 'active' || activity.status === 'paused') {
-        newActivityArea.style.display = 'none';
-        activeActivityArea.style.display = 'block';
-        
-        document.getElementById('currentActivityInfo').innerHTML = `
-          <strong>${activity.title}</strong><br>
-          开始时间：${activity.startDate}<br>
-          ${activity.description ? '活动说明：' + activity.description : ''}
-        `;
-        
-        // 显示/隐藏恢复按钮
-        if (activity.status === 'paused') {
-          resumeBtn.style.display = 'inline-block';
-        } else {
-          resumeBtn.style.display = 'none';
-        }
-        
-        // 更新数据概览
-        updateActivityOverview();
-      } else {
-        newActivityArea.style.display = 'block';
-        activeActivityArea.style.display = 'none';
-      }
-    }
-    
-    // 更新活动概览
-    function updateActivityOverview() {
-      const submissions = JSON.parse(localStorage.getItem('currentSubmissions') || '[]');
-      const nameList = JSON.parse(localStorage.getItem('currentNameList') || '[]');
-      
-      const totalImages = submissions.reduce((sum, s) => sum + s.images.length, 0);
-      const submissionRate = nameList.length > 0 ? Math.round((submissions.length / nameList.length) * 100) : 0;
-      
-      document.getElementById('activityOverview').innerHTML = `
-        <div class="stats">
-          <div class="stat-card">
-            <div class="stat-number" style="color: #d63384;">${nameList.length}</div>
-            <div class="stat-label">参与人数</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" style="color: #28a745;">${submissions.length}</div>
-            <div class="stat-label">已提交人数</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" style="color: #007bff;">${totalImages}</div>
-            <div class="stat-label">收集图片数</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" style="color: #ffc107;">${submissionRate}%</div>
-            <div class="stat-label">提交率</div>
-          </div>
-        </div>
-      `;
-    }
-    
-    // 更新提交区域
-    function updateSubmitArea() {
-      const activity = JSON.parse(localStorage.getItem('currentActivity') || '{}');
-      const submitFormArea = document.getElementById('submitFormArea');
-      const submitClosedArea = document.getElementById('submitClosedArea');
-      const uploadArea = document.getElementById('uploadArea');
-      
-      if (activity.status === 'active') {
-        submitFormArea.style.display = 'block';
-        submitClosedArea.style.display = 'none';
-        uploadArea.classList.remove('disabled');
-      } else {
-        submitFormArea.style.display = 'none';
-        submitClosedArea.style.display = 'block';
-        uploadArea.classList.add('disabled');
-      }
-    }
-    
-    // 更新活动显示
-    function updateActivityDisplay() {
-      const activity = JSON.parse(localStorage.getItem('currentActivity') || '{}');
-      const statusElement = document.getElementById('activityStatus');
-      
-      if (activity.title) {
-        document.getElementById('currentActivityTitle').textContent = activity.title;
-        
-        if (activity.status === 'active') {
-          statusElement.textContent = '进行中';
-          statusElement.className = 'status-badge';
-        } else if (activity.status === 'paused') {
-          statusElement.textContent = '已暂停';
-          statusElement.className = 'status-badge inactive';
-        }
-        
-        updateActivityStats();
-      } else {
-        document.getElementById('currentActivityTitle').textContent = '当前收集活动';
-        document.getElementById('activityStats').textContent = '等待设置活动';
-        statusElement.textContent = '未开始';
-        statusElement.className = 'status-badge inactive';
-      }
-      
-      updateSubmitArea();
-    }
-    
-    // 更新活动统计
-    function updateActivityStats() {
-      const submissions = JSON.parse(localStorage.getItem('currentSubmissions') || '[]');
-      const memberList = JSON.parse(localStorage.getItem('currentNameList') || '[]');
-      
-      let stats = `已收到 ${submissions.length} 人提交`;
-      if (memberList.length > 0) {
-        const rate = Math.round((submissions.length / memberList.length) * 100);
-        stats += ` | 参与率 ${rate}%`;
-      }
-      
-      document.getElementById('activityStats').textContent = stats;
     }
     
     // 保存名单
@@ -1209,20 +821,16 @@
       }
       
       const names = nameList.split('\n').filter(name => name.trim()).map(name => name.trim());
-      localStorage.setItem('currentNameList', JSON.stringify(names));
-      
-      // 保存为常用名单模板
-      localStorage.setItem('nameListTemplate', JSON.stringify(names));
+      localStorage.setItem('nameList', JSON.stringify(names));
       
       displayCurrentNameList();
       updateActivityStats();
-      updateActivityOverview();
       showAlert('success', `已保存 ${names.length} 个成员名单！`);
     }
     
     // 显示当前名单
     function displayCurrentNameList() {
-      const names = JSON.parse(localStorage.getItem('currentNameList') || '[]');
+      const names = JSON.parse(localStorage.getItem('nameList') || '[]');
       const display = document.getElementById('nameListDisplay');
       
       if (names.length > 0) {
@@ -1238,36 +846,36 @@
       }
     }
     
-    // 加载常用名单模板
+    // 加载上次名单
     function loadTemplate() {
-      const template = JSON.parse(localStorage.getItem('nameListTemplate') || '[]');
+      const template = JSON.parse(localStorage.getItem('nameList') || '[]');
       if (template.length > 0) {
         document.getElementById('nameList').value = template.join('\n');
-        showAlert('success', '已加载常用名单模板！');
+        showAlert('success', '已加载上次使用的名单！');
       } else {
-        alert('暂无保存的常用名单模板！');
+        alert('暂无保存的名单！');
       }
     }
     
     // 清空名单
     function clearNameList() {
-      if (confirm('确定要清空当前名单吗？')) {
+      if (confirm('确定要清空名单吗？')) {
         document.getElementById('nameList').value = '';
-        localStorage.removeItem('currentNameList');
+        localStorage.removeItem('nameList');
         displayCurrentNameList();
         updateActivityStats();
         showAlert('warning', '名单已清空！');
       }
     }
     
-    // 更新提交状态
-    function updateSubmissionStatus() {
-      const memberList = JSON.parse(localStorage.getItem('currentNameList') || '[]');
-      const submissions = JSON.parse(localStorage.getItem('currentSubmissions') || '[]');
+    // 刷新统计
+    function refreshStats() {
+      const memberList = JSON.parse(localStorage.getItem('nameList') || '[]');
+      const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
       
       if (memberList.length === 0) {
         document.getElementById('statusDisplay').innerHTML = 
-          '<div class="alert alert-warning">请先在"成员名单"页面添加成员名单！</div>';
+          '<div class="alert alert-warning">请先在"管理名单"页面添加成员名单！</div>';
         return;
       }
       
@@ -1308,30 +916,30 @@
       document.getElementById('statusDisplay').innerHTML = html;
     }
     
-    // 显示当前活动提交记录
-    function displayCurrentSubmissions() {
-      const submissions = JSON.parse(localStorage.getItem('currentSubmissions') || '[]');
+    // 显示提交的图片
+    function displaySubmissions() {
+      const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
       const display = document.getElementById('submissionsList');
       
       if (submissions.length === 0) {
-        display.innerHTML = '<div class="alert alert-info">当前活动暂无图片提交</div>';
+        display.innerHTML = '<div class="alert alert-info">暂无截图提交</div>';
         return;
       }
       
       let html = '';
-      submissions.reverse().forEach(submission => {
+      submissions.slice().reverse().forEach(submission => {
         html += `
           <div class="submission-item">
             <div class="submission-header">
               <span>${submission.name}</span>
               <span style="font-size: 0.9em; color: #6c757d;">${submission.date}</span>
             </div>
-            <div>共 ${submission.images.length} 张图片</div>
+            <div>共 ${submission.images.length} 张截图</div>
             <div class="submission-images">
         `;
         
-        submission.images.forEach(image => {
-          html += `<img src="${image.data}" alt="${image.name}" onclick="viewImage('${image.data}', '${image.name}')">`;
+        submission.images.forEach((image, imgIndex) => {
+          html += `<img src="${image.data}" alt="${image.name}" onclick="viewImage('${image.data}', '${submission.name}_${imgIndex + 1}')">`;
         });
         
         html += `
@@ -1341,135 +949,6 @@
       });
       
       display.innerHTML = html;
-    }
-    
-    // 显示档案
-    function displayArchives() {
-      const archives = JSON.parse(localStorage.getItem('activityArchives') || '[]');
-      const display = document.getElementById('archiveDisplay');
-      
-      if (archives.length === 0) {
-        display.innerHTML = '<div style="text-align: center; color: #6c757d; padding: 40px;">暂无历史档案</div>';
-        return;
-      }
-      
-      let html = '';
-      archives.forEach(archive => {
-        html += `
-          <div class="archive-item">
-            <div class="archive-header">
-              <div>
-                <div class="archive-title">${archive.title}</div>
-                <div class="archive-date">${archive.startDate} - ${archive.endDate}</div>
-              </div>
-              <button class="submit-button secondary-button" style="padding: 8px 15px; font-size: 14px; margin: 0;" onclick="viewArchiveDetail(${archive.id})">
-                查看详情
-              </button>
-            </div>
-            
-            <div class="archive-stats">
-              <div class="archive-stat">
-                <div class="archive-stat-number">${archive.totalMembers}</div>
-                <div class="archive-stat-label">总人数</div>
-              </div>
-              <div class="archive-stat">
-                <div class="archive-stat-number">${archive.submittedCount}</div>
-                <div class="archive-stat-label">已提交</div>
-              </div>
-              <div class="archive-stat">
-                <div class="archive-stat-number">${archive.submissionRate}%</div>
-                <div class="archive-stat-label">提交率</div>
-              </div>
-              <div class="archive-stat">
-                <div class="archive-stat-number">${archive.submissions.reduce((sum, s) => sum + s.images.length, 0)}</div>
-                <div class="archive-stat-label">图片数</div>
-              </div>
-            </div>
-            
-            ${archive.description ? `<div style="margin-top: 15px; color: #6c757d; font-size: 0.9em;">${archive.description}</div>` : ''}
-          </div>
-        `;
-      });
-      
-      display.innerHTML = html;
-    }
-    
-    // 查看档案详情
-    function viewArchiveDetail(archiveId) {
-      const archives = JSON.parse(localStorage.getItem('activityArchives') || '[]');
-      const archive = archives.find(a => a.id === archiveId);
-      
-      if (!archive) return;
-      
-      // 创建新窗口显示详情
-      const popup = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
-      
-      let html = `
-        <html>
-        <head>
-          <title>${archive.title} - 详细档案</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .stats { display: flex; justify-content: space-around; margin: 20px 0; }
-            .stat { text-align: center; }
-            .stat-number { font-size: 2em; font-weight: bold; color: #d63384; }
-            .submissions { margin-top: 30px; }
-            .submission { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 8px; }
-            .images { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-            .images img { width: 100px; height: 100px; object-fit: cover; border-radius: 5px; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>${archive.title}</h1>
-            <p>${archive.startDate} - ${archive.endDate}</p>
-            ${archive.description ? `<p>${archive.description}</p>` : ''}
-          </div>
-          
-          <div class="stats">
-            <div class="stat">
-              <div class="stat-number">${archive.totalMembers}</div>
-              <div>总人数</div>
-            </div>
-            <div class="stat">
-              <div class="stat-number">${archive.submittedCount}</div>
-              <div>已提交</div>
-            </div>
-            <div class="stat">
-              <div class="stat-number">${archive.submissionRate}%</div>
-              <div>提交率</div>
-            </div>
-          </div>
-          
-          <div class="submissions">
-            <h3>提交记录</h3>
-      `;
-      
-      archive.submissions.forEach(submission => {
-        html += `
-          <div class="submission">
-            <strong>${submission.name}</strong> - ${submission.date} (${submission.images.length}张图片)
-            <div class="images">
-        `;
-        
-        submission.images.forEach(image => {
-          html += `<img src="${image.data}" alt="${image.name}">`;
-        });
-        
-        html += `
-            </div>
-          </div>
-        `;
-      });
-      
-      html += `
-          </div>
-        </body>
-        </html>
-      `;
-      
-      popup.document.write(html);
     }
     
     // 查看大图
@@ -1485,37 +964,115 @@
       `);
     }
     
-    // 导出当前活动数据
-    function exportCurrentData() {
-      const activity = JSON.parse(localStorage.getItem('currentActivity') || '{}');
-      const submissions = JSON.parse(localStorage.getItem('currentSubmissions') || '[]');
-      const nameList = JSON.parse(localStorage.getItem('currentNameList') || '[]');
+    // 更新活动统计
+    function updateActivityStats() {
+      const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+      const memberList = JSON.parse(localStorage.getItem('nameList') || '[]');
       
-      const data = {
-        activity: activity,
-        nameList: nameList,
-        submissions: submissions
-      };
+      if (submissions.length === 0 && memberList.length === 0) {
+        document.getElementById('activityStats').textContent = '等待开始收集';
+        document.getElementById('activityStatus').textContent = '准备中';
+        document.getElementById('activityStatus').className = 'status-badge inactive';
+        return;
+      }
       
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      let stats = `已收到 ${submissions.length} 人提交`;
+      if (memberList.length > 0) {
+        const rate = Math.round((submissions.length / memberList.length) * 100);
+        stats += ` | 完成率 ${rate}%`;
+      }
+      
+      document.getElementById('activityStats').textContent = stats;
+      document.getElementById('activityStatus').textContent = '收集中';
+      document.getElementById('activityStatus').className = 'status-badge';
+    }
+    
+    // 更新数据概览
+    function updateDataOverview() {
+      const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+      const nameList = JSON.parse(localStorage.getItem('nameList') || '[]');
+      const totalImages = submissions.reduce((sum, s) => sum + s.images.length, 0);
+      
+      const overview = document.getElementById('dataOverview');
+      overview.innerHTML = `
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-number" style="color: #d63384;">${nameList.length}</div>
+            <div class="stat-label">名单人数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" style="color: #28a745;">${submissions.length}</div>
+            <div class="stat-label">已提交人数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" style="color: #007bff;">${totalImages}</div>
+            <div class="stat-label">总图片数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" style="color: #ffc107;">${nameList.length > 0 ? Math.round((submissions.length / nameList.length) * 100) : 0}%</div>
+            <div class="stat-label">完成率</div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // 导出统计
+    function exportStats() {
+      const memberList = JSON.parse(localStorage.getItem('nameList') || '[]');
+      const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+      
+      if (memberList.length === 0) {
+        alert('请先添加成员名单！');
+        return;
+      }
+      
+      const submittedNames = submissions.map(s => s.name);
+      const notSubmitted = memberList.filter(name => !submittedNames.includes(name));
+      const submitted = memberList.filter(name => submittedNames.includes(name));
+      
+      let content = `舞蹈团截图收集统计报告\n`;
+      content += `生成时间：${new Date().toLocaleString()}\n\n`;
+      content += `总人数：${memberList.length}\n`;
+      content += `已提交：${submitted.length}\n`;
+      content += `未提交：${notSubmitted.length}\n`;
+      content += `完成率：${Math.round((submitted.length / memberList.length) * 100)}%\n\n`;
+      
+      if (submitted.length > 0) {
+        content += `已提交名单：\n`;
+        submitted.forEach((name, index) => {
+          const submission = submissions.find(s => s.name === name);
+          content += `${index + 1}. ${name} (${submission.images.length}张图片)\n`;
+        });
+        content += `\n`;
+      }
+      
+      if (notSubmitted.length > 0) {
+        content += `未提交名单：\n`;
+        notSubmitted.forEach((name, index) => {
+          content += `${index + 1}. ${name}\n`;
+        });
+      }
+      
+      const blob = new Blob([content], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${activity.title || '当前活动'}_数据_${new Date().toISOString().slice(0,10)}.json`;
+      a.download = `舞蹈团截图收集统计_${new Date().toISOString().slice(0,10)}.txt`;
       a.click();
       URL.revokeObjectURL(url);
     }
     
-    // 下载当前活动图片
-    function downloadCurrentImages() {
-      const submissions = JSON.parse(localStorage.getItem('currentSubmissions') || '[]');
+    // 批量下载图片
+    function downloadAllImages() {
+      const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
       if (submissions.length === 0) {
-        alert('当前活动暂无图片可下载');
+        alert('暂无图片可下载');
         return;
       }
       
       showAlert('info', '正在准备下载，请稍候...');
       
+      let downloadCount = 0;
       submissions.forEach(submission => {
         submission.images.forEach((image, index) => {
           setTimeout(() => {
@@ -1523,30 +1080,78 @@
             a.href = image.data;
             a.download = `${submission.name}_${index + 1}_${image.name}`;
             a.click();
-          }, index * 200);
+          }, downloadCount * 200);
+          downloadCount++;
         });
       });
     }
     
-    // 清空当前活动图片
-    function clearCurrentImages() {
-      if (confirm('确定要清空当前活动的所有图片吗？此操作不可恢复！')) {
-        localStorage.removeItem('currentSubmissions');
-        displayCurrentSubmissions();
-        updateSubmissionStatus();
+    // 导出所有数据
+    function exportAllData() {
+      const data = {
+        nameList: JSON.parse(localStorage.getItem('nameList') || '[]'),
+        submissions: JSON.parse(localStorage.getItem('submissions') || '[]'),
+        exportDate: new Date().toLocaleString()
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `舞蹈团收集数据_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      showAlert('success', '数据导出成功！');
+    }
+    
+    // 清空所有数据
+    function clearAllData() {
+      if (confirm('确定要清空所有数据吗？包括名单和所有提交的截图，此操作不可恢复！')) {
+        localStorage.removeItem('nameList');
+        localStorage.removeItem('submissions');
+        
+        // 重置页面显示
+        document.getElementById('nameList').value = '';
+        selectedFiles = [];
+        updateImagePreview();
+        displayCurrentNameList();
+        refreshStats();
+        displaySubmissions();
         updateActivityStats();
-        updateActivityOverview();
-        showAlert('warning', '当前活动图片已清空！');
+        updateDataOverview();
+        
+        showAlert('warning', '所有数据已清空！可以开始新的收集活动了');
       }
     }
     
-    // 清空所有档案
-    function clearAllArchives() {
-      if (confirm('确定要清空所有历史档案吗？此操作不可恢复！')) {
-        localStorage.removeItem('activityArchives');
-        displayArchives();
-        showAlert('warning', '所有历史档案已清空！');
+    // 只清空提交记录
+    function clearSubmissions() {
+      if (confirm('确定要清空所有提交记录吗？此操作不可恢复！')) {
+        localStorage.removeItem('submissions');
+        refreshStats();
+        displaySubmissions();
+        updateActivityStats();
+        updateDataOverview();
+        showAlert('warning', '提交记录已清空！');
       }
+    }
+    
+    // 只清空名单
+    function clearNameListOnly() {
+      if (confirm('确定要清空成员名单吗？')) {
+        localStorage.removeItem('nameList');
+        document.getElementById('nameList').value = '';
+        displayCurrentNameList();
+        updateActivityStats();
+        updateDataOverview();
+        showAlert('warning', '成员名单已清空！');
+      }
+    }
+    
+    // 清空选中图片（占位函数）
+    function clearSelectedImages() {
+      alert('该功能正在开发中，请使用"数据管理"页面的清空功能');
     }
     
     // 显示提示信息
@@ -1574,11 +1179,10 @@
     
     // 页面加载时初始化
     window.addEventListener('DOMContentLoaded', function() {
-      updateActivityDisplay();
-      updateActivityManagement();
+      updateActivityStats();
       
       // 恢复名单数据
-      const savedList = localStorage.getItem('currentNameList');
+      const savedList = localStorage.getItem('nameList');
       if (savedList) {
         const names = JSON.parse(savedList);
         document.getElementById('nameList').value = names.join('\n');
