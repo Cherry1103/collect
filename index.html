@@ -278,18 +278,13 @@
       font-size: 12px;
       font-weight: bold;
       z-index: 1000;
-      background: #f8d7da;
-      color: #721c24;
-    }
-    
-    .status-connected {
-      background: #d4edda !important;
-      color: #155724 !important;
+      background: #d4edda;
+      color: #155724;
     }
   </style>
 </head>
 <body>
-  <div id="statusIndicator" class="status-indicator">🔄 加载中...</div>
+  <div id="statusIndicator" class="status-indicator">🟢 系统正常</div>
 
   <div class="container">
     <h1>💃 艺协舞蹈团截图收集 🌸</h1>
@@ -344,7 +339,7 @@
       <!-- 名单公示 -->
       <div class="instruction">
         <h3 style="color: #d63384; margin-bottom: 15px;">📋 参与名单</h3>
-        <div id="publicMemberList">🔄 加载中...</div>
+        <div id="publicMemberList"></div>
       </div>
     </div>
     
@@ -353,7 +348,7 @@
       <div id="passwordSection" class="password-section">
         <div class="admin-title">🔐 管理员验证</div>
         <div class="form-group">
-          <input type="password" id="adminPassword" placeholder="请输入管理密码">
+          <input type="password" id="adminPassword" placeholder="请输入管理密码: dance2024">
           <button class="submit-button" onclick="verifyPassword()">🔓 登录管理</button>
         </div>
       </div>
@@ -365,14 +360,14 @@
             <label for="nameList">成员名单（每行一个姓名）：</label>
             <textarea id="nameList" placeholder="张三&#10;李四&#10;王五&#10;小红&#10;小明&#10;..."></textarea>
           </div>
-          <button class="submit-button" onclick="saveNameList()">💾 保存到云端</button>
+          <button class="submit-button" onclick="saveNameList()">💾 保存名单</button>
           <button class="submit-button secondary-button" onclick="loadCurrentList()">📋 重新加载</button>
         </div>
         
         <div class="admin-section">
           <div class="admin-title">✅ 提交状态管理</div>
           <p style="color: #856404; margin-bottom: 15px;">点击成员姓名可以切换提交状态</p>
-          <div id="adminMemberList" class="member-list">🔄 加载中...</div>
+          <div id="adminMemberList" class="member-list"></div>
         </div>
         
         <div class="admin-section">
@@ -384,18 +379,24 @@
   </div>
 
   <script>
-    // ==================== 配置区域 ====================
+    // ==================== 配置 ====================
     const CONFIG = {
-      // GitHub用户名和Gist ID（需要你设置）
-      GITHUB_USERNAME: 'your-username',  // 👈 改成你的GitHub用户名
-      GIST_ID: 'your-gist-id',           // 👈 改成你的Gist ID
-      
-      // 其他配置
       QUESTIONNAIRE_URL: 'https://wj.qq.com/s2/23523995/5bd5/',
       ADMIN_PASSWORD: 'dance2024',
       
-      // 默认数据
-      DEFAULT_NAMES: ['张三', '李四', '王五', '小红', '小明', '小华', '小丽', '小强', '小美', '小东']
+      // 🎯 直接在这里修改名单，不需要JSON文件！
+      DEFAULT_NAMES: [
+        '张三',
+        '李四', 
+        '王五',
+        '小红',
+        '小明',
+        '小华',
+        '小丽',
+        '小强',
+        '小美',
+        '小东'
+      ]
     };
     
     // ==================== 全局变量 ====================
@@ -403,91 +404,25 @@
     let submittedList = [];
     let isAdminLoggedIn = false;
     
-    // ==================== 数据存储方案 ====================
+    // ==================== 数据管理 ====================
     
-    // 使用JSONBin.io作为免费数据库
-    const JSONBIN_API = 'https://api.jsonbin.io/v3/b/YOUR_BIN_ID';
-    const JSONBIN_KEY = '$2a$10$YOUR_API_KEY';
-    
-    // 备用方案：使用固定的URL
-    const BACKUP_DATA_URL = 'https://gist.githubusercontent.com/username/gist-id/raw/data.json';
-    
-    // 加载数据
-    async function loadData() {
-      updateStatus('🔄 连接云端数据库...');
+    function loadData() {
+      // 从localStorage加载或使用默认数据
+      const savedNames = localStorage.getItem('memberNames');
+      const savedSubmitted = localStorage.getItem('submittedList');
       
-      try {
-        // 方案1：从固定URL加载（需要你手动创建）
-        const response = await fetch('https://api.jsonbin.io/v3/b/673d5e57ad19ca34f8c6c6cd', {
-          headers: {
-            'X-Master-Key': '$2a$10$rHqbVEGlOFKP9TYKj8H8KeKFJ2wZnGzJ4kQ2.N8FjRp8BwRh6vNbS'
-          }
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          memberNames = data.record.memberNames || CONFIG.DEFAULT_NAMES;
-          submittedList = data.record.submittedList || [];
-          updateStatus('🟢 云端数据已加载', true);
-          updateAllDisplays();
-          return;
-        }
-      } catch (error) {
-        console.log('云端加载失败，使用默认数据:', error);
-      }
+      memberNames = savedNames ? JSON.parse(savedNames) : [...CONFIG.DEFAULT_NAMES];
+      submittedList = savedSubmitted ? JSON.parse(savedSubmitted) : [];
       
-      // 备用方案：使用默认数据
-      memberNames = [...CONFIG.DEFAULT_NAMES];
-      submittedList = [];
-      updateStatus('🟡 使用默认数据');
       updateAllDisplays();
     }
     
-    // 保存数据
-    async function saveData() {
-      updateStatus('🔄 保存到云端...');
-      
-      const data = {
-        memberNames: memberNames,
-        submittedList: submittedList,
-        lastUpdate: new Date().toISOString()
-      };
-      
-      try {
-        const response = await fetch('https://api.jsonbin.io/v3/b/673d5e57ad19ca34f8c6c6cd', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': '$2a$10$rHqbVEGlOFKP9TYKj8H8KeKFJ2wZnGzJ4kQ2.N8FjRp8BwRh6vNbS'
-          },
-          body: JSON.stringify(data)
-        });
-        
-        if (response.ok) {
-          updateStatus('🟢 保存成功', true);
-          return true;
-        }
-      } catch (error) {
-        console.log('保存失败:', error);
-      }
-      
-      updateStatus('🔴 保存失败');
-      return false;
+    function saveData() {
+      localStorage.setItem('memberNames', JSON.stringify(memberNames));
+      localStorage.setItem('submittedList', JSON.stringify(submittedList));
     }
     
-    // 更新状态指示器
-    function updateStatus(message, isConnected = false) {
-      const indicator = document.getElementById('statusIndicator');
-      indicator.textContent = message;
-      
-      if (isConnected) {
-        indicator.classList.add('status-connected');
-      } else {
-        indicator.classList.remove('status-connected');
-      }
-    }
-    
-    // ==================== 核心功能 ====================
+    // ==================== 界面功能 ====================
     
     function switchTab(tabName) {
       document.querySelectorAll('.tab-content').forEach(content => {
@@ -511,7 +446,7 @@
         loadAdminData();
         showAlert('success', '管理员登录成功！');
       } else {
-        showAlert('error', '密码错误！');
+        showAlert('error', '密码错误！正确密码是: dance2024');
         document.getElementById('adminPassword').value = '';
       }
     }
@@ -527,7 +462,7 @@
       showAlert('info', `${name}，问卷页面已打开，请在问卷中填写姓名并上传截图！`);
     }
     
-    async function saveNameList() {
+    function saveNameList() {
       if (!isAdminLoggedIn) return;
       
       const nameList = document.getElementById('nameList').value.trim();
@@ -541,14 +476,10 @@
         .map(name => name.trim());
       
       memberNames = names;
+      saveData();
       
-      const success = await saveData();
-      if (success) {
-        showAlert('success', `✅ 成功保存 ${names.length} 个成员到云端！`);
-        updateAllDisplays();
-      } else {
-        showAlert('error', '❌ 保存失败，请检查网络连接！');
-      }
+      showAlert('success', `✅ 成功保存 ${names.length} 个成员！`);
+      updateAllDisplays();
     }
     
     function loadCurrentList() {
@@ -558,7 +489,7 @@
       showAlert('success', '已加载当前名单！');
     }
     
-    async function toggleMemberStatus(name) {
+    function toggleMemberStatus(name) {
       if (!isAdminLoggedIn) return;
       
       const index = submittedList.indexOf(name);
@@ -571,7 +502,7 @@
         showAlert('success', `${name} 标记为已提交`);
       }
       
-      await saveData();
+      saveData();
       updateAllDisplays();
     }
     
@@ -667,9 +598,7 @@
     }
     
     function loadAdminData() {
-      if (memberNames.length > 0) {
-        document.getElementById('nameList').value = memberNames.join('\n');
-      }
+      document.getElementById('nameList').value = memberNames.join('\n');
       updateAdminMemberList();
       updateNotSubmittedAlert();
     }
@@ -707,16 +636,13 @@
       
       setTimeout(() => {
         alert.remove();
-      }, 3000);
+      }, 4000);
     }
     
     // ==================== 初始化 ====================
     
     window.addEventListener('DOMContentLoaded', function() {
       loadData();
-      
-      // 每30秒自动刷新数据
-      setInterval(loadData, 30000);
     });
   </script>
 </body>
