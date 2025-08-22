@@ -283,32 +283,13 @@
       display: none;
     }
     
-    .loading {
-      text-align: center;
-      color: #6c757d;
-      font-style: italic;
-      padding: 20px;
-    }
-    
-    .connection-status {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      padding: 8px 15px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: bold;
-      z-index: 1000;
-    }
-    
-    .connected {
+    .success-message {
       background: #d4edda;
       color: #155724;
-    }
-    
-    .disconnected {
-      background: #f8d7da;
-      color: #721c24;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0;
+      border: 1px solid #c3e6cb;
     }
     
     @media (max-width: 768px) {
@@ -345,9 +326,6 @@
   </style>
 </head>
 <body>
-  <!-- 连接状态指示器 -->
-  <div id="connectionStatus" class="connection-status disconnected">🔄 连接中...</div>
-
   <div class="container">
     <h1>💃 艺协舞蹈团截图收集 🌸</h1>
     
@@ -398,10 +376,10 @@
         </button>
       </div>
       
-      <!-- 名单公示（所有人都能看到实时状态） -->
+      <!-- 名单公示 -->
       <div class="instruction">
         <h3 style="color: #d63384; margin-bottom: 15px;">📋 参与名单</h3>
-        <div id="publicMemberList" class="loading">🔄 加载中...</div>
+        <div id="publicMemberList"></div>
       </div>
     </div>
     
@@ -416,7 +394,7 @@
         </div>
       </div>
       
-      <!-- 管理内容（需要密码验证后显示） -->
+      <!-- 管理内容 -->
       <div id="adminContent" class="hidden">
         <!-- 编辑名单 -->
         <div class="admin-section">
@@ -425,18 +403,17 @@
             <label for="nameList">成员名单（每行一个姓名）：</label>
             <textarea id="nameList" placeholder="张三&#10;李四&#10;王五&#10;小红&#10;小明&#10;..."></textarea>
           </div>
-          <button class="submit-button" onclick="saveNameList()">💾 保存名单到云端</button>
+          <button class="submit-button" onclick="saveNameList()">💾 保存名单</button>
           <button class="submit-button secondary-button" onclick="loadCurrentList()">📋 加载当前名单</button>
-          <button class="submit-button warning-button" onclick="clearAllSubmissions()">🗑️ 清空提交记录</button>
+          <button class="submit-button warning-button" onclick="clearAll()">🗑️ 清空所有数据</button>
+          <div id="saveResult"></div>
         </div>
         
         <!-- 提交状态管理 -->
         <div class="admin-section">
           <div class="admin-title">✅ 提交状态管理</div>
           <p style="color: #856404; margin-bottom: 15px;">点击成员姓名可以切换提交状态</p>
-          <div id="adminMemberList" class="member-list">
-            <div class="loading">🔄 加载中...</div>
-          </div>
+          <div id="adminMemberList" class="member-list"></div>
         </div>
         
         <!-- 未提交提醒 -->
@@ -448,92 +425,7 @@
     </div>
   </div>
 
-  <!-- 使用简化版的数据存储 -->
   <script>
-    // ==================== 简化版数据存储 ====================
-    // 使用一个简单的在线JSON存储服务
-    const API_BASE = 'https://api.jsonbin.io/v3/b/64f8a1234567890abcdef123'; // 替换为真实的JSONBin ID
-    const API_KEY = '$2a$10$abcdefghijklmnopqrstuvwxyz'; // 替换为真实的API Key
-    
-    // 配置
-    const QUESTIONNAIRE_URL = 'https://wj.qq.com/s2/23523995/5bd5/';
-    const ADMIN_PASSWORD = 'dance2024';
-    
-    // 全局状态
-    let isAdminLoggedIn = false;
-    let memberNames = [];
-    let submittedList = [];
-    let isLoading = false;
-
-    // 模拟数据（如果API不可用时使用）
-    const DEFAULT_DATA = {
-      memberNames: ['张三', '李四', '王五', '小红', '小明', '小华', '小丽'],
-      submittedList: []
-    };
-
-    // 连接状态
-    const connectionStatus = document.getElementById('connectionStatus');
-
-    // 更新连接状态
-    function updateConnectionStatus(connected, message = '') {
-      if (connected) {
-        connectionStatus.textContent = '🟢 云端已连接';
-        connectionStatus.className = 'connection-status connected';
-      } else {
-        connectionStatus.textContent = message || '🔴 使用本地数据';
-        connectionStatus.className = 'connection-status disconnected';
-      }
-    }
-
-    // 从云端加载数据（简化版）
-    async function loadDataFromCloud() {
-      try {
-        // 模拟API调用 - 在实际使用中替换为真实的API
-        await new Promise(resolve => setTimeout(resolve, 1000)); // 模拟网络延迟
-        
-        // 检查localStorage是否有数据
-        const savedNames = localStorage.getItem('cloudMemberNames');
-        const savedSubmitted = localStorage.getItem('cloudSubmittedList');
-        
-        if (savedNames) {
-          memberNames = JSON.parse(savedNames);
-        } else {
-          memberNames = [...DEFAULT_DATA.memberNames];
-        }
-        
-        if (savedSubmitted) {
-          submittedList = JSON.parse(savedSubmitted);
-        } else {
-          submittedList = [...DEFAULT_DATA.submittedList];
-        }
-        
-        updateConnectionStatus(true);
-        updateAllLists();
-      } catch (error) {
-        console.log('使用默认数据:', error);
-        memberNames = [...DEFAULT_DATA.memberNames];
-        submittedList = [...DEFAULT_DATA.submittedList];
-        updateConnectionStatus(false, '🟡 使用示例数据');
-        updateAllLists();
-      }
-    }
-
-    // 保存数据到云端（简化版）
-    async function saveDataToCloud() {
-      try {
-        // 保存到localStorage作为云端存储的模拟
-        localStorage.setItem('cloudMemberNames', JSON.stringify(memberNames));
-        localStorage.setItem('cloudSubmittedList', JSON.stringify(submittedList));
-        
-        updateConnectionStatus(true);
-        return true;
-      } catch (error) {
-        console.error('保存失败:', error);
-        updateConnectionStatus(false, '🔴 保存失败');
-        return false;
-      }
-    }
-
     // 樱花特效
     function createCherry() {
       const cherries = ['🌸', '💖', '🍒', '💕', '🎀', '🌺'];
@@ -561,7 +453,40 @@
     }
     
     setInterval(createCherry, 3000);
-
+    
+    // 配置
+    const QUESTIONNAIRE_URL = 'https://wj.qq.com/s2/23523995/5bd5/';
+    const ADMIN_PASSWORD = 'dance2024';
+    
+    // 全局状态
+    let isAdminLoggedIn = false;
+    
+    // 获取名单
+    function getMemberNames() {
+      const saved = localStorage.getItem('memberNames');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      // 默认名单
+      return ['张三', '李四', '王五', '小红', '小明', '小华', '小丽', '小强', '小美', '小东'];
+    }
+    
+    // 获取提交列表
+    function getSubmittedList() {
+      const saved = localStorage.getItem('submittedList');
+      return saved ? JSON.parse(saved) : [];
+    }
+    
+    // 保存名单
+    function saveMemberNames(names) {
+      localStorage.setItem('memberNames', JSON.stringify(names));
+    }
+    
+    // 保存提交列表
+    function saveSubmittedList(list) {
+      localStorage.setItem('submittedList', JSON.stringify(list));
+    }
+    
     // 标签页切换
     function switchTab(tabName) {
       document.querySelectorAll('.tab-content').forEach(content => {
@@ -575,7 +500,7 @@
       document.getElementById(tabName).classList.add('active');
       event.target.classList.add('active');
     }
-
+    
     // 密码验证
     function verifyPassword() {
       const password = document.getElementById('adminPassword').value;
@@ -590,7 +515,7 @@
         document.getElementById('adminPassword').value = '';
       }
     }
-
+    
     // 跳转到问卷
     function goToQuestionnaire() {
       const name = document.getElementById('studentName').value.trim();
@@ -602,9 +527,9 @@
       window.open(QUESTIONNAIRE_URL, '_blank');
       showAlert('info', `${name}，问卷页面已打开，请在问卷中填写姓名并上传截图！`);
     }
-
-    // 保存名单到云端 - 修复后的版本
-    async function saveNameList() {
+    
+    // 保存名单 - 修复版本
+    function saveNameList() {
       if (!isAdminLoggedIn) return;
       
       const nameList = document.getElementById('nameList').value.trim();
@@ -613,53 +538,50 @@
         return;
       }
       
-      const names = nameList.split('\n').filter(name => name.trim()).map(name => name.trim());
+      const names = nameList.split('\n')
+        .filter(name => name.trim())
+        .map(name => name.trim());
       
-      // 更新全局变量
-      memberNames = names;
+      // 保存到localStorage
+      saveMemberNames(names);
       
-      // 保存到云端
-      const success = await saveDataToCloud();
-      if (success) {
-        showAlert('success', `✅ 已保存 ${names.length} 个成员到云端！所有人都能看到最新名单。`);
-        updateAllLists();
-      } else {
-        showAlert('error', '❌ 保存失败，请稍后重试！');
-      }
+      // 显示成功信息
+      const saveResult = document.getElementById('saveResult');
+      saveResult.innerHTML = `<div class="success-message">✅ 成功保存 ${names.length} 个成员！</div>`;
+      
+      // 更新所有显示
+      updateAllLists();
+      
+      showAlert('success', `保存成功！已更新 ${names.length} 个成员名单`);
     }
-
+    
     // 加载当前名单
     function loadCurrentList() {
       if (!isAdminLoggedIn) return;
       
-      if (memberNames.length > 0) {
-        document.getElementById('nameList').value = memberNames.join('\n');
-        showAlert('success', '📋 已加载当前云端名单！');
-      } else {
-        alert('当前云端暂无名单！');
-      }
+      const names = getMemberNames();
+      document.getElementById('nameList').value = names.join('\n');
+      showAlert('success', '已加载当前名单！');
     }
-
-    // 清空提交记录
-    async function clearAllSubmissions() {
+    
+    // 清空所有数据
+    function clearAll() {
       if (!isAdminLoggedIn) return;
       
-      if (confirm('⚠️ 确定要清空所有提交记录吗？此操作不可撤销！')) {
-        submittedList = [];
-        const success = await saveDataToCloud();
-        if (success) {
-          showAlert('warning', '🗑️ 已清空所有提交记录！');
-          updateAllLists();
-        } else {
-          showAlert('error', '❌ 清空失败，请稍后重试！');
-        }
+      if (confirm('确定要清空所有数据吗？包括名单和提交记录！')) {
+        localStorage.removeItem('memberNames');
+        localStorage.removeItem('submittedList');
+        document.getElementById('nameList').value = '';
+        updateAllLists();
+        showAlert('warning', '已清空所有数据！');
       }
     }
-
+    
     // 切换成员提交状态
-    async function toggleMemberStatus(name) {
+    function toggleMemberStatus(name) {
       if (!isAdminLoggedIn) return;
       
+      const submittedList = getSubmittedList();
       const index = submittedList.indexOf(name);
       
       if (index > -1) {
@@ -670,13 +592,14 @@
         showAlert('success', `${name} 标记为已提交`);
       }
       
-      // 保存到云端
-      await saveDataToCloud();
+      saveSubmittedList(submittedList);
       updateAllLists();
     }
-
+    
     // 更新管理员成员列表
     function updateAdminMemberList() {
+      const memberNames = getMemberNames();
+      const submittedList = getSubmittedList();
       const memberListEl = document.getElementById('adminMemberList');
       
       if (memberNames.length === 0) {
@@ -701,13 +624,15 @@
       
       memberListEl.innerHTML = html;
     }
-
+    
     // 更新公开的成员列表
     function updatePublicMemberList() {
+      const memberNames = getMemberNames();
+      const submittedList = getSubmittedList();
       const publicListEl = document.getElementById('publicMemberList');
       
       if (memberNames.length === 0) {
-        publicListEl.innerHTML = '<p style="color: #6c757d;">暂无名单，请联系管理员添加</p>';
+        publicListEl.innerHTML = '<p style="color: #6c757d;">暂无名单</p>';
         return;
       }
       
@@ -729,9 +654,12 @@
       
       publicListEl.innerHTML = html;
     }
-
+    
     // 更新统计数据
     function updateStatistics() {
+      const memberNames = getMemberNames();
+      const submittedList = getSubmittedList();
+      
       const total = memberNames.length;
       const submitted = submittedList.filter(name => memberNames.includes(name)).length;
       const notSubmitted = total - submitted;
@@ -742,9 +670,11 @@
       document.getElementById('notSubmittedCount').textContent = notSubmitted;
       document.getElementById('submissionRate').textContent = rate + '%';
     }
-
+    
     // 更新未提交提醒
     function updateNotSubmittedAlert() {
+      const memberNames = getMemberNames();
+      const submittedList = getSubmittedList();
       const notSubmitted = memberNames.filter(name => !submittedList.includes(name));
       const alertEl = document.getElementById('notSubmittedAlert');
       
@@ -758,7 +688,7 @@
         alertEl.innerHTML = html;
       }
     }
-
+    
     // 更新所有列表
     function updateAllLists() {
       updateStatistics();
@@ -768,16 +698,17 @@
         updateNotSubmittedAlert();
       }
     }
-
+    
     // 加载管理员数据
     function loadAdminData() {
-      if (memberNames.length > 0) {
-        document.getElementById('nameList').value = memberNames.join('\n');
+      const names = getMemberNames();
+      if (names.length > 0) {
+        document.getElementById('nameList').value = names.join('\n');
       }
       updateAdminMemberList();
       updateNotSubmittedAlert();
     }
-
+    
     // 显示提示信息
     function showAlert(type, message) {
       const existingAlert = document.querySelector('.alert-message');
@@ -797,7 +728,7 @@
       alert.textContent = message;
       alert.style.cssText = `
         position: fixed;
-        top: 60px;
+        top: 20px;
         right: 20px;
         z-index: 9999;
         max-width: 300px;
@@ -812,21 +743,13 @@
       
       setTimeout(() => {
         alert.remove();
-      }, 4000);
+      }, 3000);
     }
-
+    
     // 页面加载时初始化
     window.addEventListener('DOMContentLoaded', function() {
-      updateConnectionStatus(false, '🔄 加载中...');
-      loadDataFromCloud();
+      updateAllLists();
     });
-
-    // 定期同步数据（每30秒）
-    setInterval(() => {
-      if (!isLoading) {
-        loadDataFromCloud();
-      }
-    }, 30000);
   </script>
 </body>
 </html>
