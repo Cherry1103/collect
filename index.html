@@ -14,15 +14,6 @@
       padding: 10px;
     }
     
-    .cherry { 
-      position: fixed; 
-      font-size: 20px; 
-      user-select: none; 
-      pointer-events: none; 
-      z-index: 1000;
-      opacity: 0.8;
-    }
-    
     .container {
       max-width: 900px;
       margin: 20px auto;
@@ -125,10 +116,6 @@
       background: linear-gradient(45deg, #28a745, #20c997) !important;
     }
     
-    .warning-button {
-      background: linear-gradient(45deg, #ffc107, #fd7e14) !important;
-    }
-    
     input[type="text"], input[type="password"], textarea {
       width: 100%;
       padding: 15px;
@@ -147,7 +134,6 @@
     
     textarea {
       min-height: 120px;
-      font-family: monospace;
       resize: vertical;
     }
     
@@ -283,49 +269,28 @@
       display: none;
     }
     
-    .success-message {
-      background: #d4edda;
-      color: #155724;
-      padding: 10px;
-      border-radius: 8px;
-      margin: 10px 0;
-      border: 1px solid #c3e6cb;
+    .status-indicator {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      z-index: 1000;
+      background: #f8d7da;
+      color: #721c24;
     }
     
-    @media (max-width: 768px) {
-      .container {
-        margin: 10px;
-        padding: 20px;
-      }
-      
-      h1 {
-        font-size: 1.8em;
-      }
-      
-      .tabs {
-        flex-direction: column;
-      }
-      
-      .tab {
-        margin: 2px 0;
-      }
-      
-      .member-list {
-        grid-template-columns: 1fr;
-      }
-      
-      .stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      
-      .submit-button {
-        width: 100%;
-        margin: 5px 0;
-      }
+    .status-connected {
+      background: #d4edda !important;
+      color: #155724 !important;
     }
   </style>
 </head>
 <body>
+  <div id="statusIndicator" class="status-indicator">🔄 加载中...</div>
+
   <div class="container">
     <h1>💃 艺协舞蹈团截图收集 🌸</h1>
     
@@ -379,13 +344,12 @@
       <!-- 名单公示 -->
       <div class="instruction">
         <h3 style="color: #d63384; margin-bottom: 15px;">📋 参与名单</h3>
-        <div id="publicMemberList"></div>
+        <div id="publicMemberList">🔄 加载中...</div>
       </div>
     </div>
     
     <!-- 管理面板 -->
     <div id="manage" class="tab-content">
-      <!-- 密码验证 -->
       <div id="passwordSection" class="password-section">
         <div class="admin-title">🔐 管理员验证</div>
         <div class="form-group">
@@ -394,29 +358,23 @@
         </div>
       </div>
       
-      <!-- 管理内容 -->
       <div id="adminContent" class="hidden">
-        <!-- 编辑名单 -->
         <div class="admin-section">
           <div class="admin-title">📝 编辑参与名单</div>
           <div class="form-group">
             <label for="nameList">成员名单（每行一个姓名）：</label>
             <textarea id="nameList" placeholder="张三&#10;李四&#10;王五&#10;小红&#10;小明&#10;..."></textarea>
           </div>
-          <button class="submit-button" onclick="saveNameList()">💾 保存名单</button>
-          <button class="submit-button secondary-button" onclick="loadCurrentList()">📋 加载当前名单</button>
-          <button class="submit-button warning-button" onclick="clearAll()">🗑️ 清空所有数据</button>
-          <div id="saveResult"></div>
+          <button class="submit-button" onclick="saveNameList()">💾 保存到云端</button>
+          <button class="submit-button secondary-button" onclick="loadCurrentList()">📋 重新加载</button>
         </div>
         
-        <!-- 提交状态管理 -->
         <div class="admin-section">
           <div class="admin-title">✅ 提交状态管理</div>
           <p style="color: #856404; margin-bottom: 15px;">点击成员姓名可以切换提交状态</p>
-          <div id="adminMemberList" class="member-list"></div>
+          <div id="adminMemberList" class="member-list">🔄 加载中...</div>
         </div>
         
-        <!-- 未提交提醒 -->
         <div class="admin-section">
           <div class="admin-title">📢 未提交名单</div>
           <div id="notSubmittedAlert"></div>
@@ -426,68 +384,111 @@
   </div>
 
   <script>
-    // 樱花特效
-    function createCherry() {
-      const cherries = ['🌸', '💖', '🍒', '💕', '🎀', '🌺'];
-      const cherry = document.createElement('div');
-      cherry.className = 'cherry';
-      cherry.innerHTML = cherries[Math.floor(Math.random() * cherries.length)];
-      cherry.style.left = Math.random() * window.innerWidth + 'px';
-      cherry.style.top = '-50px';
-      document.body.appendChild(cherry);
+    // ==================== 配置区域 ====================
+    const CONFIG = {
+      // GitHub用户名和Gist ID（需要你设置）
+      GITHUB_USERNAME: 'your-username',  // 👈 改成你的GitHub用户名
+      GIST_ID: 'your-gist-id',           // 👈 改成你的Gist ID
       
-      let pos = -50;
-      const speed = 1 + Math.random() * 2;
-      const sway = Math.random() * 1 - 0.5;
+      // 其他配置
+      QUESTIONNAIRE_URL: 'https://wj.qq.com/s2/23523995/5bd5/',
+      ADMIN_PASSWORD: 'dance2024',
       
-      const animation = setInterval(() => {
-        pos += speed;
-        cherry.style.top = pos + 'px';
-        cherry.style.left = (parseFloat(cherry.style.left) + sway) + 'px';
-        
-        if (pos > window.innerHeight) {
-          clearInterval(animation);
-          cherry.remove();
-        }
-      }, 50);
-    }
+      // 默认数据
+      DEFAULT_NAMES: ['张三', '李四', '王五', '小红', '小明', '小华', '小丽', '小强', '小美', '小东']
+    };
     
-    setInterval(createCherry, 3000);
-    
-    // 配置
-    const QUESTIONNAIRE_URL = 'https://wj.qq.com/s2/23523995/5bd5/';
-    const ADMIN_PASSWORD = 'dance2024';
-    
-    // 全局状态
+    // ==================== 全局变量 ====================
+    let memberNames = [];
+    let submittedList = [];
     let isAdminLoggedIn = false;
     
-    // 获取名单
-    function getMemberNames() {
-      const saved = localStorage.getItem('memberNames');
-      if (saved) {
-        return JSON.parse(saved);
+    // ==================== 数据存储方案 ====================
+    
+    // 使用JSONBin.io作为免费数据库
+    const JSONBIN_API = 'https://api.jsonbin.io/v3/b/YOUR_BIN_ID';
+    const JSONBIN_KEY = '$2a$10$YOUR_API_KEY';
+    
+    // 备用方案：使用固定的URL
+    const BACKUP_DATA_URL = 'https://gist.githubusercontent.com/username/gist-id/raw/data.json';
+    
+    // 加载数据
+    async function loadData() {
+      updateStatus('🔄 连接云端数据库...');
+      
+      try {
+        // 方案1：从固定URL加载（需要你手动创建）
+        const response = await fetch('https://api.jsonbin.io/v3/b/673d5e57ad19ca34f8c6c6cd', {
+          headers: {
+            'X-Master-Key': '$2a$10$rHqbVEGlOFKP9TYKj8H8KeKFJ2wZnGzJ4kQ2.N8FjRp8BwRh6vNbS'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          memberNames = data.record.memberNames || CONFIG.DEFAULT_NAMES;
+          submittedList = data.record.submittedList || [];
+          updateStatus('🟢 云端数据已加载', true);
+          updateAllDisplays();
+          return;
+        }
+      } catch (error) {
+        console.log('云端加载失败，使用默认数据:', error);
       }
-      // 默认名单
-      return ['张三', '李四', '王五', '小红', '小明', '小华', '小丽', '小强', '小美', '小东'];
+      
+      // 备用方案：使用默认数据
+      memberNames = [...CONFIG.DEFAULT_NAMES];
+      submittedList = [];
+      updateStatus('🟡 使用默认数据');
+      updateAllDisplays();
     }
     
-    // 获取提交列表
-    function getSubmittedList() {
-      const saved = localStorage.getItem('submittedList');
-      return saved ? JSON.parse(saved) : [];
+    // 保存数据
+    async function saveData() {
+      updateStatus('🔄 保存到云端...');
+      
+      const data = {
+        memberNames: memberNames,
+        submittedList: submittedList,
+        lastUpdate: new Date().toISOString()
+      };
+      
+      try {
+        const response = await fetch('https://api.jsonbin.io/v3/b/673d5e57ad19ca34f8c6c6cd', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': '$2a$10$rHqbVEGlOFKP9TYKj8H8KeKFJ2wZnGzJ4kQ2.N8FjRp8BwRh6vNbS'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          updateStatus('🟢 保存成功', true);
+          return true;
+        }
+      } catch (error) {
+        console.log('保存失败:', error);
+      }
+      
+      updateStatus('🔴 保存失败');
+      return false;
     }
     
-    // 保存名单
-    function saveMemberNames(names) {
-      localStorage.setItem('memberNames', JSON.stringify(names));
+    // 更新状态指示器
+    function updateStatus(message, isConnected = false) {
+      const indicator = document.getElementById('statusIndicator');
+      indicator.textContent = message;
+      
+      if (isConnected) {
+        indicator.classList.add('status-connected');
+      } else {
+        indicator.classList.remove('status-connected');
+      }
     }
     
-    // 保存提交列表
-    function saveSubmittedList(list) {
-      localStorage.setItem('submittedList', JSON.stringify(list));
-    }
+    // ==================== 核心功能 ====================
     
-    // 标签页切换
     function switchTab(tabName) {
       document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
@@ -501,10 +502,9 @@
       event.target.classList.add('active');
     }
     
-    // 密码验证
     function verifyPassword() {
       const password = document.getElementById('adminPassword').value;
-      if (password === ADMIN_PASSWORD) {
+      if (password === CONFIG.ADMIN_PASSWORD) {
         isAdminLoggedIn = true;
         document.getElementById('passwordSection').classList.add('hidden');
         document.getElementById('adminContent').classList.remove('hidden');
@@ -516,7 +516,6 @@
       }
     }
     
-    // 跳转到问卷
     function goToQuestionnaire() {
       const name = document.getElementById('studentName').value.trim();
       if (!name) {
@@ -524,12 +523,11 @@
         return;
       }
       
-      window.open(QUESTIONNAIRE_URL, '_blank');
+      window.open(CONFIG.QUESTIONNAIRE_URL, '_blank');
       showAlert('info', `${name}，问卷页面已打开，请在问卷中填写姓名并上传截图！`);
     }
     
-    // 保存名单 - 修复版本
-    function saveNameList() {
+    async function saveNameList() {
       if (!isAdminLoggedIn) return;
       
       const nameList = document.getElementById('nameList').value.trim();
@@ -542,46 +540,27 @@
         .filter(name => name.trim())
         .map(name => name.trim());
       
-      // 保存到localStorage
-      saveMemberNames(names);
+      memberNames = names;
       
-      // 显示成功信息
-      const saveResult = document.getElementById('saveResult');
-      saveResult.innerHTML = `<div class="success-message">✅ 成功保存 ${names.length} 个成员！</div>`;
-      
-      // 更新所有显示
-      updateAllLists();
-      
-      showAlert('success', `保存成功！已更新 ${names.length} 个成员名单`);
-    }
-    
-    // 加载当前名单
-    function loadCurrentList() {
-      if (!isAdminLoggedIn) return;
-      
-      const names = getMemberNames();
-      document.getElementById('nameList').value = names.join('\n');
-      showAlert('success', '已加载当前名单！');
-    }
-    
-    // 清空所有数据
-    function clearAll() {
-      if (!isAdminLoggedIn) return;
-      
-      if (confirm('确定要清空所有数据吗？包括名单和提交记录！')) {
-        localStorage.removeItem('memberNames');
-        localStorage.removeItem('submittedList');
-        document.getElementById('nameList').value = '';
-        updateAllLists();
-        showAlert('warning', '已清空所有数据！');
+      const success = await saveData();
+      if (success) {
+        showAlert('success', `✅ 成功保存 ${names.length} 个成员到云端！`);
+        updateAllDisplays();
+      } else {
+        showAlert('error', '❌ 保存失败，请检查网络连接！');
       }
     }
     
-    // 切换成员提交状态
-    function toggleMemberStatus(name) {
+    function loadCurrentList() {
       if (!isAdminLoggedIn) return;
       
-      const submittedList = getSubmittedList();
+      document.getElementById('nameList').value = memberNames.join('\n');
+      showAlert('success', '已加载当前名单！');
+    }
+    
+    async function toggleMemberStatus(name) {
+      if (!isAdminLoggedIn) return;
+      
       const index = submittedList.indexOf(name);
       
       if (index > -1) {
@@ -592,47 +571,38 @@
         showAlert('success', `${name} 标记为已提交`);
       }
       
-      saveSubmittedList(submittedList);
-      updateAllLists();
+      await saveData();
+      updateAllDisplays();
     }
     
-    // 更新管理员成员列表
-    function updateAdminMemberList() {
-      const memberNames = getMemberNames();
-      const submittedList = getSubmittedList();
-      const memberListEl = document.getElementById('adminMemberList');
-      
-      if (memberNames.length === 0) {
-        memberListEl.innerHTML = '<div class="alert alert-info">请先添加成员名单</div>';
-        return;
+    // ==================== 显示更新 ====================
+    
+    function updateAllDisplays() {
+      updateStatistics();
+      updatePublicMemberList();
+      if (isAdminLoggedIn) {
+        updateAdminMemberList();
+        updateNotSubmittedAlert();
       }
-      
-      let html = '';
-      memberNames.forEach(name => {
-        const isSubmitted = submittedList.includes(name);
-        const statusClass = isSubmitted ? 'submitted' : 'not-submitted';
-        const statusIcon = isSubmitted ? '✅' : '❌';
-        const statusText = isSubmitted ? '已提交' : '未提交';
-        
-        html += `
-          <div class="member-item ${statusClass} clickable" onclick="toggleMemberStatus('${name}')">
-            <span>${name}</span>
-            <span>${statusIcon} ${statusText}</span>
-          </div>
-        `;
-      });
-      
-      memberListEl.innerHTML = html;
     }
     
-    // 更新公开的成员列表
+    function updateStatistics() {
+      const total = memberNames.length;
+      const submitted = submittedList.filter(name => memberNames.includes(name)).length;
+      const notSubmitted = total - submitted;
+      const rate = total > 0 ? Math.round((submitted / total) * 100) : 0;
+      
+      document.getElementById('totalCount').textContent = total;
+      document.getElementById('submittedCount').textContent = submitted;
+      document.getElementById('notSubmittedCount').textContent = notSubmitted;
+      document.getElementById('submissionRate').textContent = rate + '%';
+    }
+    
     function updatePublicMemberList() {
-      const memberNames = getMemberNames();
-      const submittedList = getSubmittedList();
-      const publicListEl = document.getElementById('publicMemberList');
+      const listEl = document.getElementById('publicMemberList');
       
       if (memberNames.length === 0) {
-        publicListEl.innerHTML = '<p style="color: #6c757d;">暂无名单</p>';
+        listEl.innerHTML = '<p style="color: #6c757d;">暂无名单</p>';
         return;
       }
       
@@ -652,29 +622,36 @@
       });
       html += '</div>';
       
-      publicListEl.innerHTML = html;
+      listEl.innerHTML = html;
     }
     
-    // 更新统计数据
-    function updateStatistics() {
-      const memberNames = getMemberNames();
-      const submittedList = getSubmittedList();
+    function updateAdminMemberList() {
+      const listEl = document.getElementById('adminMemberList');
       
-      const total = memberNames.length;
-      const submitted = submittedList.filter(name => memberNames.includes(name)).length;
-      const notSubmitted = total - submitted;
-      const rate = total > 0 ? Math.round((submitted / total) * 100) : 0;
+      if (memberNames.length === 0) {
+        listEl.innerHTML = '<div class="alert alert-info">请先添加成员名单</div>';
+        return;
+      }
       
-      document.getElementById('totalCount').textContent = total;
-      document.getElementById('submittedCount').textContent = submitted;
-      document.getElementById('notSubmittedCount').textContent = notSubmitted;
-      document.getElementById('submissionRate').textContent = rate + '%';
+      let html = '';
+      memberNames.forEach(name => {
+        const isSubmitted = submittedList.includes(name);
+        const statusClass = isSubmitted ? 'submitted' : 'not-submitted';
+        const statusIcon = isSubmitted ? '✅' : '❌';
+        const statusText = isSubmitted ? '已提交' : '未提交';
+        
+        html += `
+          <div class="member-item ${statusClass} clickable" onclick="toggleMemberStatus('${name}')">
+            <span>${name}</span>
+            <span>${statusIcon} ${statusText}</span>
+          </div>
+        `;
+      });
+      
+      listEl.innerHTML = html;
     }
     
-    // 更新未提交提醒
     function updateNotSubmittedAlert() {
-      const memberNames = getMemberNames();
-      const submittedList = getSubmittedList();
       const notSubmitted = memberNames.filter(name => !submittedList.includes(name));
       const alertEl = document.getElementById('notSubmittedAlert');
       
@@ -689,27 +666,14 @@
       }
     }
     
-    // 更新所有列表
-    function updateAllLists() {
-      updateStatistics();
-      updatePublicMemberList();
-      if (isAdminLoggedIn) {
-        updateAdminMemberList();
-        updateNotSubmittedAlert();
-      }
-    }
-    
-    // 加载管理员数据
     function loadAdminData() {
-      const names = getMemberNames();
-      if (names.length > 0) {
-        document.getElementById('nameList').value = names.join('\n');
+      if (memberNames.length > 0) {
+        document.getElementById('nameList').value = memberNames.join('\n');
       }
       updateAdminMemberList();
       updateNotSubmittedAlert();
     }
     
-    // 显示提示信息
     function showAlert(type, message) {
       const existingAlert = document.querySelector('.alert-message');
       if (existingAlert) {
@@ -728,7 +692,7 @@
       alert.textContent = message;
       alert.style.cssText = `
         position: fixed;
-        top: 20px;
+        top: 60px;
         right: 20px;
         z-index: 9999;
         max-width: 300px;
@@ -746,9 +710,13 @@
       }, 3000);
     }
     
-    // 页面加载时初始化
+    // ==================== 初始化 ====================
+    
     window.addEventListener('DOMContentLoaded', function() {
-      updateAllLists();
+      loadData();
+      
+      // 每30秒自动刷新数据
+      setInterval(loadData, 30000);
     });
   </script>
 </body>
