@@ -125,7 +125,7 @@
       background: linear-gradient(45deg, #28a745, #20c997) !important;
     }
     
-    input[type="text"], textarea {
+    input[type="text"], input[type="password"], textarea {
       width: 100%;
       padding: 15px;
       border: 2px solid #e9ecef;
@@ -135,7 +135,7 @@
       transition: border-color 0.3s ease;
     }
     
-    input[type="text"]:focus, textarea:focus {
+    input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
       outline: none;
       border-color: #d63384;
       box-shadow: 0 0 0 3px rgba(214, 51, 132, 0.1);
@@ -279,6 +279,34 @@
       display: none;
     }
     
+    .loading {
+      text-align: center;
+      color: #6c757d;
+      font-style: italic;
+      padding: 20px;
+    }
+    
+    .connection-status {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      z-index: 1000;
+    }
+    
+    .connected {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .disconnected {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
     @media (max-width: 768px) {
       .container {
         margin: 10px;
@@ -313,6 +341,9 @@
   </style>
 </head>
 <body>
+  <!-- 连接状态指示器 -->
+  <div id="connectionStatus" class="connection-status disconnected">🔄 连接中...</div>
+
   <div class="container">
     <h1>💃 艺协舞蹈团截图收集 🌸</h1>
     
@@ -363,10 +394,10 @@
         </button>
       </div>
       
-      <!-- 名单公示（所有人都能看到） -->
+      <!-- 名单公示（所有人都能看到实时状态） -->
       <div class="instruction">
         <h3 style="color: #d63384; margin-bottom: 15px;">📋 参与名单</h3>
-        <div id="publicMemberList"></div>
+        <div id="publicMemberList" class="loading">🔄 加载中...</div>
       </div>
     </div>
     
@@ -391,13 +422,16 @@
             <textarea id="nameList" placeholder="张三&#10;李四&#10;王五&#10;小红&#10;小明&#10;..."></textarea>
           </div>
           <button class="submit-button" onclick="saveNameList()">💾 保存名单</button>
+          <button class="submit-button secondary-button" onclick="loadCurrentList()">📋 加载当前名单</button>
         </div>
         
         <!-- 提交状态管理 -->
         <div class="admin-section">
           <div class="admin-title">✅ 提交状态管理</div>
           <p style="color: #856404; margin-bottom: 15px;">点击成员姓名可以切换提交状态</p>
-          <div id="adminMemberList" class="member-list"></div>
+          <div id="adminMemberList" class="member-list">
+            <div class="loading">🔄 加载中...</div>
+          </div>
         </div>
         
         <!-- 未提交提醒 -->
@@ -409,7 +443,66 @@
     </div>
   </div>
 
-  <script>
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getDatabase, ref, set, get, onValue, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+    // Firebase 配置（免费版本）
+    const firebaseConfig = {
+      apiKey: "AIzaSyDQVj3QGx4vQb9mK4OiJ1VfHfQHgLpOFyc",
+      authDomain: "dance-team-collection.firebaseapp.com",
+      databaseURL: "https://dance-team-collection-default-rtdb.firebaseio.com",
+      projectId: "dance-team-collection",
+      storageBucket: "dance-team-collection.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abcdef123456"
+    };
+
+    // 初始化 Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // 配置
+    const QUESTIONNAIRE_URL = 'https://wj.qq.com/s2/23523995/5bd5/';
+    const ADMIN_PASSWORD = 'dance2024';
+    
+    // 全局状态
+    let isAdminLoggedIn = false;
+    let memberNames = [];
+    let submittedList = [];
+
+    // 数据库引用
+    const namesRef = ref(database, 'memberNames');
+    const submittedRef = ref(database, 'submittedList');
+
+    // 初始化连接状态
+    const connectionStatus = document.getElementById('connectionStatus');
+    
+    // 监听数据变化（实时同步）
+    onValue(namesRef, (snapshot) => {
+      memberNames = snapshot.val() || [];
+      updateAllLists();
+      updateConnectionStatus(true);
+    });
+
+    onValue(submittedRef, (snapshot) => {
+      submittedList = snapshot.val() || [];
+      updateAllLists();
+      updateConnectionStatus(true);
+    });
+
+    // 更新连接状态
+    function updateConnectionStatus(connected) {
+      if (connected) {
+        connectionStatus.textContent = '🟢 已连接';
+        connectionStatus.className = 'connection-status connected';
+      } else {
+        connectionStatus.textContent = '🔴 连接中断';
+        connectionStatus.className = 'connection-status disconnected';
+      }
+    }
+
     // 樱花特效
     function createCherry() {
       const cherries = ['🌸', '💖', '🍒', '💕', '🎀', '🌺'];
@@ -437,25 +530,9 @@
     }
     
     setInterval(createCherry, 3000);
-    
-    // ==================== 重要：数据直接写在代码里 ====================
-    // 名单数据（修改这里的名单，所有人都能看到）
-    const MEMBER_NAMES = [
-      "张三", "李四", "王五", "小红", "小明", 
-      "小华", "小丽", "小强", "小美", "小东",
-      "小西", "小南", "小北", "小中", "小英"
-      // 👆 修改这里添加你的成员名单
-    ];
-    
-    // 配置
-    const QUESTIONNAIRE_URL = 'https://wj.qq.com/s2/23523995/5bd5/';
-    const ADMIN_PASSWORD = 'dance2024'; // 管理密码
-    
-    // 全局状态
-    let isAdminLoggedIn = false;
-    
+
     // 标签页切换
-    function switchTab(tabName) {
+    window.switchTab = function(tabName) {
       document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
       });
@@ -467,9 +544,9 @@
       document.getElementById(tabName).classList.add('active');
       event.target.classList.add('active');
     }
-    
+
     // 密码验证
-    function verifyPassword() {
+    window.verifyPassword = function() {
       const password = document.getElementById('adminPassword').value;
       if (password === ADMIN_PASSWORD) {
         isAdminLoggedIn = true;
@@ -482,24 +559,21 @@
         document.getElementById('adminPassword').value = '';
       }
     }
-    
+
     // 跳转到问卷
-    function goToQuestionnaire() {
+    window.goToQuestionnaire = function() {
       const name = document.getElementById('studentName').value.trim();
       if (!name) {
         alert('请先输入你的姓名！');
         return;
       }
       
-      // 跳转到问卷
       window.open(QUESTIONNAIRE_URL, '_blank');
-      
-      // 显示提交指南
       showAlert('info', `${name}，问卷页面已打开，请在问卷中填写姓名并上传截图！`);
     }
-    
-    // 保存名单（管理员功能）
-    function saveNameList() {
+
+    // 保存名单到云端
+    window.saveNameList = async function() {
       if (!isAdminLoggedIn) return;
       
       const nameList = document.getElementById('nameList').value.trim();
@@ -508,35 +582,61 @@
         return;
       }
       
-      showAlert('info', '⚠️ 修改名单需要更新代码文件，请联系技术人员更新！');
+      const names = nameList.split('\n').filter(name => name.trim()).map(name => name.trim());
+      
+      try {
+        await set(namesRef, names);
+        showAlert('success', `已保存 ${names.length} 个成员名单到云端！`);
+      } catch (error) {
+        showAlert('error', '保存失败：' + error.message);
+      }
     }
-    
-    // 切换成员提交状态（管理员功能）
-    function toggleMemberStatus(name) {
+
+    // 加载当前名单
+    window.loadCurrentList = function() {
       if (!isAdminLoggedIn) return;
       
-      const submittedList = JSON.parse(localStorage.getItem('submittedList') || '[]');
+      if (memberNames.length > 0) {
+        document.getElementById('nameList').value = memberNames.join('\n');
+        showAlert('success', '已加载当前云端名单！');
+      } else {
+        alert('当前云端暂无名单！');
+      }
+    }
+
+    // 切换成员提交状态
+    window.toggleMemberStatus = async function(name) {
+      if (!isAdminLoggedIn) return;
+      
       const index = submittedList.indexOf(name);
+      let newSubmittedList = [...submittedList];
       
       if (index > -1) {
-        submittedList.splice(index, 1);
+        newSubmittedList.splice(index, 1);
         showAlert('info', `${name} 标记为未提交`);
       } else {
-        submittedList.push(name);
+        newSubmittedList.push(name);
         showAlert('success', `${name} 标记为已提交`);
       }
       
-      localStorage.setItem('submittedList', JSON.stringify(submittedList));
-      updateAllLists();
+      try {
+        await set(submittedRef, newSubmittedList);
+      } catch (error) {
+        showAlert('error', '更新失败：' + error.message);
+      }
     }
-    
+
     // 更新管理员成员列表
     function updateAdminMemberList() {
-      const submittedList = JSON.parse(localStorage.getItem('submittedList') || '[]');
       const memberListEl = document.getElementById('adminMemberList');
       
+      if (memberNames.length === 0) {
+        memberListEl.innerHTML = '<div class="alert alert-info">请先添加成员名单</div>';
+        return;
+      }
+      
       let html = '';
-      MEMBER_NAMES.forEach(name => {
+      memberNames.forEach(name => {
         const isSubmitted = submittedList.includes(name);
         const statusClass = isSubmitted ? 'submitted' : 'not-submitted';
         const statusIcon = isSubmitted ? '✅' : '❌';
@@ -552,14 +652,18 @@
       
       memberListEl.innerHTML = html;
     }
-    
-    // 更新公开的成员列表（所有人都能看到）
+
+    // 更新公开的成员列表
     function updatePublicMemberList() {
-      const submittedList = JSON.parse(localStorage.getItem('submittedList') || '[]');
       const publicListEl = document.getElementById('publicMemberList');
       
+      if (memberNames.length === 0) {
+        publicListEl.innerHTML = '<p style="color: #6c757d;">暂无名单，请联系管理员添加</p>';
+        return;
+      }
+      
       let html = '<div class="member-list">';
-      MEMBER_NAMES.forEach(name => {
+      memberNames.forEach(name => {
         const isSubmitted = submittedList.includes(name);
         const statusClass = isSubmitted ? 'submitted' : 'not-submitted';
         const statusIcon = isSubmitted ? '✅' : '⏳';
@@ -576,13 +680,11 @@
       
       publicListEl.innerHTML = html;
     }
-    
+
     // 更新统计数据
     function updateStatistics() {
-      const submittedList = JSON.parse(localStorage.getItem('submittedList') || '[]');
-      
-      const total = MEMBER_NAMES.length;
-      const submitted = submittedList.filter(name => MEMBER_NAMES.includes(name)).length;
+      const total = memberNames.length;
+      const submitted = submittedList.filter(name => memberNames.includes(name)).length;
       const notSubmitted = total - submitted;
       const rate = total > 0 ? Math.round((submitted / total) * 100) : 0;
       
@@ -591,11 +693,10 @@
       document.getElementById('notSubmittedCount').textContent = notSubmitted;
       document.getElementById('submissionRate').textContent = rate + '%';
     }
-    
+
     // 更新未提交提醒
     function updateNotSubmittedAlert() {
-      const submittedList = JSON.parse(localStorage.getItem('submittedList') || '[]');
-      const notSubmitted = MEMBER_NAMES.filter(name => !submittedList.includes(name));
+      const notSubmitted = memberNames.filter(name => !submittedList.includes(name));
       const alertEl = document.getElementById('notSubmittedAlert');
       
       if (notSubmitted.length === 0) {
@@ -608,7 +709,7 @@
         alertEl.innerHTML = html;
       }
     }
-    
+
     // 更新所有列表
     function updateAllLists() {
       updateStatistics();
@@ -618,14 +719,16 @@
         updateNotSubmittedAlert();
       }
     }
-    
+
     // 加载管理员数据
     function loadAdminData() {
-      document.getElementById('nameList').value = MEMBER_NAMES.join('\n');
+      if (memberNames.length > 0) {
+        document.getElementById('nameList').value = memberNames.join('\n');
+      }
       updateAdminMemberList();
       updateNotSubmittedAlert();
     }
-    
+
     // 显示提示信息
     function showAlert(type, message) {
       const existingAlert = document.querySelector('.alert-message');
@@ -662,11 +765,9 @@
         alert.remove();
       }, 3000);
     }
-    
-    // 页面加载时初始化
-    window.addEventListener('DOMContentLoaded', function() {
-      updateAllLists();
-    });
+
+    // 使函数全局可访问
+    window.showAlert = showAlert;
   </script>
 </body>
 </html>
