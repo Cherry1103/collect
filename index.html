@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>💃 艺协舞蹈团截图收集系统</title>
+  <title>💃 艺协舞蹈团截图收集</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -41,20 +41,31 @@
       text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
     
-    .activity-info {
-      background: linear-gradient(45deg, #fff3cd, #ffeaa7);
-      border: 2px solid #ffc107;
-      border-radius: 15px;
-      padding: 20px;
-      margin-bottom: 30px;
-      text-align: center;
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      margin: 25px 0;
     }
     
-    .activity-title {
-      font-size: 1.5em;
+    .stat-card {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stat-number {
+      font-size: 2em;
       font-weight: bold;
-      color: #856404;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+    }
+    
+    .stat-label {
+      color: #6c757d;
+      font-weight: 600;
+      font-size: 0.9em;
     }
     
     .tabs {
@@ -63,19 +74,16 @@
       background: rgba(255, 255, 255, 0.8);
       border-radius: 15px;
       padding: 5px;
-      flex-wrap: wrap;
     }
     
     .tab {
       flex: 1;
-      min-width: 120px;
-      padding: 15px 10px;
+      padding: 15px;
       text-align: center;
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.3s ease;
       font-weight: 600;
-      font-size: 0.9em;
     }
     
     .tab.active {
@@ -117,10 +125,6 @@
       background: linear-gradient(45deg, #28a745, #20c997) !important;
     }
     
-    .warning-button {
-      background: linear-gradient(45deg, #ffc107, #ff8800) !important;
-    }
-    
     input[type="text"], textarea {
       width: 100%;
       padding: 15px;
@@ -154,59 +158,81 @@
       margin-bottom: 8px;
     }
     
-    .name-list {
+    .member-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
       margin-top: 20px;
     }
     
-    .name-item {
-      padding: 12px;
-      border-radius: 10px;
-      font-weight: 600;
-      text-align: center;
+    .member-item {
+      padding: 15px;
+      border-radius: 12px;
       transition: all 0.3s ease;
-      font-size: 0.9em;
+      cursor: pointer;
+      border: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
     }
     
-    .name-item.submitted {
+    .member-item.submitted {
       background: linear-gradient(45deg, #d4edda, #c3e6cb);
       color: #155724;
-      border: 2px solid #c3e6cb;
+      border-color: #28a745;
     }
     
-    .name-item.not-submitted {
+    .member-item.not-submitted {
       background: linear-gradient(45deg, #f8d7da, #f5c6cb);
       color: #721c24;
-      border: 2px solid #f5c6cb;
+      border-color: #dc3545;
     }
     
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 15px;
-      margin: 25px 0;
-    }
-    
-    .stat-card {
-      background: rgba(255, 255, 255, 0.9);
-      padding: 20px;
-      border-radius: 15px;
-      text-align: center;
+    .member-item:hover {
+      transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
     
-    .stat-number {
-      font-size: 2.2em;
-      font-weight: bold;
-      margin-bottom: 8px;
+    .member-checkbox {
+      width: 20px;
+      height: 20px;
+      margin-left: 10px;
+      cursor: pointer;
     }
     
-    .stat-label {
-      color: #6c757d;
-      font-weight: 600;
-      font-size: 0.9em;
+    .questionnaire-link {
+      background: rgba(214, 51, 132, 0.1);
+      border: 3px solid #d63384;
+      border-radius: 15px;
+      padding: 25px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    
+    .questionnaire-link h3 {
+      color: #d63384;
+      margin-bottom: 15px;
+    }
+    
+    .big-button {
+      background: linear-gradient(45deg, #d63384, #dc3545);
+      color: white;
+      padding: 20px 40px;
+      border: none;
+      border-radius: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(214, 51, 132, 0.4);
+    }
+    
+    .big-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(214, 51, 132, 0.5);
     }
     
     .instruction {
@@ -224,88 +250,37 @@
       font-weight: 600;
     }
     
-    .alert-success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-    
-    .alert-warning {
-      background: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeaa7;
-    }
-    
     .alert-info {
       background: #d1ecf1;
       color: #0c5460;
       border: 1px solid #bee5eb;
     }
     
-    .action-group {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 20px 0;
-    }
-    
-    .submission-checker {
-      background: rgba(255, 255, 255, 0.9);
+    .admin-section {
+      background: rgba(255, 243, 205, 0.9);
+      border: 2px solid #ffc107;
       border-radius: 15px;
       padding: 20px;
       margin: 20px 0;
     }
     
-    .check-input {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
-      align-items: center;
-    }
-    
-    .check-input input {
-      flex: 1;
-      margin: 0;
-    }
-    
-    .check-input button {
-      margin: 0;
-      white-space: nowrap;
-    }
-    
-    .questionnaire-link {
-      background: rgba(214, 51, 132, 0.1);
-      border: 3px solid #d63384;
-      border-radius: 15px;
-      padding: 25px;
-      margin: 20px 0;
-      text-align: center;
-    }
-    
-    .questionnaire-link h3 {
-      color: #d63384;
-      margin-bottom: 15px;
-    }
-    
-    .questionnaire-link .big-button {
-      background: linear-gradient(45deg, #d63384, #dc3545);
-      color: white;
-      padding: 20px 40px;
-      border: none;
-      border-radius: 15px;
-      font-size: 20px;
+    .admin-title {
+      color: #856404;
       font-weight: bold;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-      transition: all 0.3s ease;
-      box-shadow: 0 8px 25px rgba(214, 51, 132, 0.4);
+      margin-bottom: 15px;
+      font-size: 1.1em;
     }
     
-    .questionnaire-link .big-button:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 35px rgba(214, 51, 132, 0.5);
+    .password-section {
+      background: rgba(220, 53, 69, 0.1);
+      border: 2px solid #dc3545;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .hidden {
+      display: none;
     }
     
     @media (max-width: 768px) {
@@ -326,9 +301,8 @@
         margin: 2px 0;
       }
       
-      .name-list {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 10px;
+      .member-list {
+        grid-template-columns: 1fr;
       }
       
       .stats {
@@ -336,51 +310,48 @@
       }
       
       .submit-button {
-        padding: 15px 25px;
-        font-size: 16px;
-        margin: 8px;
         width: 100%;
-      }
-      
-      .action-group {
-        flex-direction: column;
-      }
-      
-      .check-input {
-        flex-direction: column;
-      }
-      
-      .check-input button {
-        width: 100%;
+        margin: 5px 0;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>💃 艺协舞蹈团截图收集系统 🌸</h1>
+    <h1>💃 艺协舞蹈团截图收集 🌸</h1>
     
-    <!-- 当前活动信息 -->
-    <div class="activity-info">
-      <div class="activity-title">艺协舞蹈团截图收集</div>
-      <div id="activityStats">请同学们提交舞蹈练习截图</div>
+    <!-- 统计概览 -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-number" style="color: #d63384;" id="totalCount">0</div>
+        <div class="stat-label">总人数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color: #28a745;" id="submittedCount">0</div>
+        <div class="stat-label">已提交</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color: #dc3545;" id="notSubmittedCount">0</div>
+        <div class="stat-label">未提交</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color: #007bff;" id="submissionRate">0%</div>
+        <div class="stat-label">提交率</div>
+      </div>
     </div>
     
     <div class="tabs">
       <div class="tab active" onclick="switchTab('submit')">📸 提交截图</div>
-      <div class="tab" onclick="switchTab('manage')">📋 管理名单</div>
-      <div class="tab" onclick="switchTab('check')">✅ 统计检查</div>
-      <div class="tab" onclick="switchTab('settings')">⚙️ 数据管理</div>
+      <div class="tab" onclick="switchTab('manage')">📋 管理面板</div>
     </div>
     
     <!-- 提交截图页面 -->
     <div id="submit" class="tab-content active">
       <div class="instruction">
-        <h3 style="color: #d63384; margin-bottom: 10px;">📋 同学提交说明</h3>
-        <p>🎭 请先输入你的姓名，然后点击下方按钮</p>
-        <p>📸 会跳转到腾讯问卷进行截图上传</p>
+        <h3 style="color: #d63384; margin-bottom: 10px;">📋 提交说明</h3>
+        <p>🎭 请先输入你的姓名，然后点击下方按钮提交截图</p>
+        <p>📸 支持多张图片上传，展示不同角度的舞蹈动作</p>
         <p>✨ 请确保姓名填写正确，方便老师统计</p>
-        <p>🎯 支持多张图片上传，展示不同角度的舞蹈动作</p>
       </div>
       
       <div class="form-group">
@@ -390,124 +361,54 @@
       
       <div class="questionnaire-link">
         <h3>📸 提交舞蹈截图</h3>
-        <p style="color: #6c757d; margin-bottom: 20px;">确认姓名后，点击下方按钮跳转到腾讯问卷提交截图</p>
+        <p style="color: #6c757d; margin-bottom: 20px;">确认姓名后，点击下方按钮跳转到问卷提交截图</p>
         <button class="big-button" onclick="goToQuestionnaire()">
-          🔗 去腾讯问卷提交
+          🔗 去问卷提交截图
         </button>
       </div>
       
-      <div id="submissionGuide" style="margin-top: 20px;"></div>
+      <!-- 名单公示 -->
+      <div class="instruction">
+        <h3 style="color: #d63384; margin-bottom: 15px;">📋 参与名单</h3>
+        <div id="publicMemberList"></div>
+      </div>
     </div>
     
-    <!-- 管理名单页面 -->
+    <!-- 管理面板 -->
     <div id="manage" class="tab-content">
-      <div class="instruction">
-        <h3 style="color: #d63384; margin-bottom: 10px;">📝 管理成员名单</h3>
-        <p>设置参与本次活动的成员名单，用于统计检查</p>
-      </div>
-      
-      <div class="form-group">
-        <label for="nameList">成员名单（每行一个姓名）：</label>
-        <textarea id="nameList" placeholder="张三&#10;李四&#10;王五&#10;小红&#10;小明&#10;..."></textarea>
-      </div>
-      
-      <div class="action-group">
-        <button class="submit-button" onclick="saveNameList()">💾 保存名单</button>
-        <button class="submit-button secondary-button" onclick="loadPreviousList()">📋 加载上次名单</button>
-        <button class="submit-button warning-button" onclick="clearNameList()">🗑️ 清空名单</button>
-      </div>
-      
-      <div id="nameListDisplay"></div>
-    </div>
-    
-    <!-- 统计检查页面 -->
-    <div id="check" class="tab-content">
-      <div class="instruction">
-        <h3 style="color: #d63384; margin-bottom: 10px;">📊 提交统计检查</h3>
-        <p>根据腾讯问卷的数据，手动标记已提交的同学</p>
-        <p style="color: #856404;">💡 建议：在腾讯问卷后台查看提交情况，然后在这里标记已提交的同学</p>
-      </div>
-      
-      <div class="alert alert-info">
-        <h4>🔗 腾讯问卷管理链接</h4>
-        <p>查看提交情况：<a href="https://wj.qq.com/mine.html" target="_blank">https://wj.qq.com/mine.html</a></p>
-        <p>找到"艺协舞蹈团截图收集"问卷，点击"查看数据"即可看到所有提交</p>
-      </div>
-      
-      <div class="submission-checker">
-        <h4 style="color: #495057; margin-bottom: 15px;">✅ 标记已提交</h4>
-        <div class="check-input">
-          <input type="text" id="submittedName" placeholder="输入已提交同学的姓名">
-          <button class="submit-button" onclick="markAsSubmitted()">✅ 标记</button>
+      <!-- 密码验证 -->
+      <div id="passwordSection" class="password-section">
+        <div class="admin-title">🔐 管理员验证</div>
+        <div class="form-group">
+          <input type="password" id="adminPassword" placeholder="请输入管理密码">
+          <button class="submit-button" onclick="verifyPassword()">🔓 登录管理</button>
         </div>
-        <div style="margin-bottom: 15px;">
-          <button class="submit-button secondary-button" onclick="batchMark()">📝 批量标记</button>
-          <button class="submit-button warning-button" onclick="clearMarked()">🗑️清空标记</button>
+      </div>
+      
+      <!-- 管理内容（需要密码验证后显示） -->
+      <div id="adminContent" class="hidden">
+        <!-- 编辑名单 -->
+        <div class="admin-section">
+          <div class="admin-title">📝 编辑参与名单</div>
+          <div class="form-group">
+            <label for="nameList">成员名单（每行一个姓名）：</label>
+            <textarea id="nameList" placeholder="张三&#10;李四&#10;王五&#10;小红&#10;小明&#10;..."></textarea>
+          </div>
+          <button class="submit-button" onclick="saveNameList()">💾 保存名单</button>
+          <button class="submit-button secondary-button" onclick="loadPreviousList()">📋 加载上次名单</button>
         </div>
         
-        <div id="markedList"></div>
-      </div>
-      
-      <div class="stats" id="stats">
-        <div class="stat-card">
-          <div class="stat-number" style="color: #d63384;" id="totalCount">0</div>
-          <div class="stat-label">总人数</div>
+        <!-- 提交状态管理 -->
+        <div class="admin-section">
+          <div class="admin-title">✅ 提交状态管理</div>
+          <p style="color: #856404; margin-bottom: 15px;">点击成员姓名可以切换提交状态</p>
+          <div id="memberList" class="member-list"></div>
         </div>
-        <div class="stat-card">
-          <div class="stat-number" style="color: #28a745;" id="submittedCount">0</div>
-          <div class="stat-label">已提交</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" style="color: #dc3545;" id="notSubmittedCount">0</div>
-          <div class="stat-label">未提交</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" style="color: #007bff;" id="submissionRate">0%</div>
-          <div class="stat-label">提交率</div>
-        </div>
-      </div>
-      
-      <div id="statusDisplay"></div>
-      
-      <div class="action-group">
-        <button class="submit-button secondary-button" onclick="exportStatistics()">📤 导出统计</button>
-        <button class="submit-button" onclick="refreshStats()">🔄 刷新统计</button>
-      </div>
-    </div>
-    
-    <!-- 数据管理页面 -->
-    <div id="settings" class="tab-content">
-      <div class="instruction">
-        <h3 style="color: #d63384; margin-bottom: 10px;">⚙️ 数据管理</h3>
-        <p>管理本次收集活动的数据</p>
-      </div>
-      
-      <div style="background: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 15px; margin: 20px 0;">
-        <h4 style="color: #495057; margin-bottom: 15px;">📋 当前数据概览</h4>
-        <div id="dataOverview"></div>
-      </div>
-      
-      <div style="background: rgba(255, 243, 205, 0.9); padding: 20px; border-radius: 15px; margin: 20px 0; border: 1px solid #ffc107;">
-        <h4 style="color: #856404; margin-bottom: 15px;">🔄 开始新收集</h4>
-        <p style="color: #856404; margin-bottom: 15px;">建议：完成一次收集后，导出数据再清空，为下次收集做准备</p>
         
-        <div class="action-group">
-          <button class="submit-button secondary-button" onclick="exportAllData()">📤 导出所有数据</button>
-          <button class="submit-button warning-button" onclick="clearAllData()">🗑️ 清空所有数据</button>
-        </div>
-      </div>
-      
-      <div style="background: rgba(214, 51, 132, 0.1); padding: 20px; border-radius: 15px; margin: 20px 0; border: 1px solid #d63384;">
-        <h4 style="color: #856404; margin-bottom: 15px;">🔗 腾讯问卷管理</h4>
-        <p style="color: #856404; margin-bottom: 15px;">访问腾讯问卷后台管理你的收集活动</p>
-        
-        <div class="action-group">
-          <a href="https://wj.qq.com/mine.html" target="_blank" class="submit-button secondary-button">
-            📊 查看问卷数据
-          </a>
-          <a href="https://wj.qq.com/s2/23523995/5bd5/" target="_blank" class="submit-button">
-            🔗 访问问卷
-          </a>
+        <!-- 未提交提醒 -->
+        <div class="admin-section">
+          <div class="admin-title">📢 未提交名单</div>
+          <div id="notSubmittedAlert"></div>
         </div>
       </div>
     </div>
@@ -542,8 +443,12 @@
     
     setInterval(createCherry, 3000);
     
-    // 腾讯问卷链接
+    // 配置
     const QUESTIONNAIRE_URL = 'https://wj.qq.com/s2/23523995/5bd5/';
+    const ADMIN_PASSWORD = 'dance2024'; // 你可以修改这个密码
+    
+    // 全局状态
+    let isAdminLoggedIn = false;
     
     // 标签页切换
     function switchTab(tabName) {
@@ -558,17 +463,27 @@
       document.getElementById(tabName).classList.add('active');
       event.target.classList.add('active');
       
-      // 切换到相应页面时更新显示
-      if (tabName === 'manage') {
-        displayNameList();
-      } else if (tabName === 'check') {
-        updateStatistics();
-      } else if (tabName === 'settings') {
-        updateDataOverview();
+      if (tabName === 'submit') {
+        updatePublicMemberList();
       }
     }
     
-    // 跳转到腾讯问卷
+    // 密码验证
+    function verifyPassword() {
+      const password = document.getElementById('adminPassword').value;
+      if (password === ADMIN_PASSWORD) {
+        isAdminLoggedIn = true;
+        document.getElementById('passwordSection').classList.add('hidden');
+        document.getElementById('adminContent').classList.remove('hidden');
+        loadAdminData();
+        showAlert('success', '管理员登录成功！');
+      } else {
+        showAlert('error', '密码错误！');
+        document.getElementById('adminPassword').value = '';
+      }
+    }
+    
+    // 跳转到问卷
     function goToQuestionnaire() {
       const name = document.getElementById('studentName').value.trim();
       if (!name) {
@@ -576,28 +491,17 @@
         return;
       }
       
-      // 显示提交指南
-      document.getElementById('submissionGuide').innerHTML = `
-        <div class="alert alert-info">
-          <h4>📝 ${name}，请完成以下步骤：</h4>
-          <p>1. 已为你打开腾讯问卷页面</p>
-          <p>2. 在问卷中确认填写姓名：<strong>${name}</strong></p>
-          <p>3. 上传你的舞蹈截图（可以多张）</p>
-          <p>4. 点击提交完成</p>
-          <p style="margin-top: 15px;">
-            <a href="${QUESTIONNAIRE_URL}" target="_blank" style="color: #d63384; font-weight: bold;">
-              🔗 如果页面没有自动打开，点击这里
-            </a>
-          </p>
-        </div>
-      `;
-      
-      // 跳转到腾讯问卷
+      // 跳转到问卷
       window.open(QUESTIONNAIRE_URL, '_blank');
+      
+      // 显示提交指南
+      showAlert('info', `${name}，问卷页面已打开，请在问卷中填写姓名并上传截图！`);
     }
     
     // 保存名单
     function saveNameList() {
+      if (!isAdminLoggedIn) return;
+      
       const nameList = document.getElementById('nameList').value.trim();
       if (!nameList) {
         alert('请输入成员名单！');
@@ -607,31 +511,16 @@
       const names = nameList.split('\n').filter(name => name.trim()).map(name => name.trim());
       localStorage.setItem('nameList', JSON.stringify(names));
       
-      displayNameList();
+      updateMemberList();
       updateStatistics();
+      updatePublicMemberList();
       showAlert('success', `已保存 ${names.length} 个成员名单！`);
-    }
-    
-    // 显示名单
-    function displayNameList() {
-      const names = JSON.parse(localStorage.getItem('nameList') || '[]');
-      const display = document.getElementById('nameListDisplay');
-      
-      if (names.length > 0) {
-        let html = `<div class="alert alert-success">当前名单共 ${names.length} 人</div>`;
-        html += '<div class="name-list">';
-        names.forEach(name => {
-          html += `<div class="name-item" style="background: #e9ecef; color: #495057; border: 1px solid #ced4da;">${name}</div>`;
-        });
-        html += '</div>';
-        display.innerHTML = html;
-      } else {
-        display.innerHTML = '<div class="alert alert-warning">暂无保存的名单</div>';
-      }
     }
     
     // 加载上次名单
     function loadPreviousList() {
+      if (!isAdminLoggedIn) return;
+      
       const names = JSON.parse(localStorage.getItem('nameList') || '[]');
       if (names.length > 0) {
         document.getElementById('nameList').value = names.join('\n');
@@ -641,288 +530,129 @@
       }
     }
     
-    // 清空名单
-    function clearNameList() {
-      if (confirm('确定要清空名单吗？')) {
-        document.getElementById('nameList').value = '';
-        localStorage.removeItem('nameList');
-        displayNameList();
-        updateStatistics();
-        showAlert('warning', '名单已清空！');
+    // 切换成员提交状态
+    function toggleMemberStatus(name) {
+      if (!isAdminLoggedIn) return;
+      
+      const submittedList = JSON.parse(localStorage.getItem('submittedList') || '[]');
+      const index = submittedList.indexOf(name);
+      
+      if (index > -1) {
+        submittedList.splice(index, 1);
+        showAlert('info', `${name} 标记为未提交`);
+      } else {
+        submittedList.push(name);
+        showAlert('success', `${name} 标记为已提交`);
       }
+      
+      localStorage.setItem('submittedList', JSON.stringify(submittedList));
+      updateMemberList();
+      updateStatistics();
+      updateNotSubmittedAlert();
+      updatePublicMemberList();
     }
     
-    // 标记为已提交
-    function markAsSubmitted() {
-      const name = document.getElementById('submittedName').value.trim();
-      if (!name) {
-        alert('请输入姓名！');
+    // 更新成员列表显示
+    function updateMemberList() {
+      const nameList = JSON.parse(localStorage.getItem('nameList') || '[]');
+      const submittedList = JSON.parse(localStorage.getItem('submittedList') || '[]');
+      const memberListEl = document.getElementById('memberList');
+      
+      if (nameList.length === 0) {
+        memberListEl.innerHTML = '<div class="alert alert-info">请先添加成员名单</div>';
         return;
       }
       
-      const markedNames = JSON.parse(localStorage.getItem('markedSubmissions') || '[]');
-      if (!markedNames.includes(name)) {
-        markedNames.push(name);
-        localStorage.setItem('markedSubmissions', JSON.stringify(markedNames));
-        document.getElementById('submittedName').value = '';
-        updateMarkedList();
-        updateStatistics();
-        showAlert('success', `已标记 ${name} 为已提交`);
-      } else {
-        alert('该同学已经标记过了！');
-      }
-    }
-    
-    // 批量标记
-    function batchMark() {
-      const text = prompt('请输入已提交的同学姓名，每行一个：');
-      if (!text) return;
-      
-      const names = text.split('\n').filter(name => name.trim()).map(name => name.trim());
-      const markedNames = JSON.parse(localStorage.getItem('markedSubmissions') || '[]');
-      
-      let addedCount = 0;
-      names.forEach(name => {
-        if (!markedNames.includes(name)) {
-          markedNames.push(name);
-          addedCount++;
-        }
+      let html = '';
+      nameList.forEach(name => {
+        const isSubmitted = submittedList.includes(name);
+        const statusClass = isSubmitted ? 'submitted' : 'not-submitted';
+        const statusIcon = isSubmitted ? '✅' : '❌';
+        const statusText = isSubmitted ? '已提交' : '未提交';
+        
+        html += `
+          <div class="member-item ${statusClass}" onclick="toggleMemberStatus('${name}')">
+            <span>${name}</span>
+            <span>${statusIcon} ${statusText}</span>
+          </div>
+        `;
       });
       
-      localStorage.setItem('markedSubmissions', JSON.stringify(markedNames));
-      updateMarkedList();
-      updateStatistics();
-      showAlert('success', `批量标记成功！共添加 ${addedCount} 个同学`);
+      memberListEl.innerHTML = html;
     }
     
-    // 清空标记
-    function clearMarked() {
-      if (confirm('确定要清空所有标记吗？')) {
-        localStorage.removeItem('markedSubmissions');
-        updateMarkedList();
-        updateStatistics();
-        showAlert('warning', '所有标记已清空！');
-      }
-    }
-    
-    // 更新标记列表显示
-    function updateMarkedList() {
-      const markedNames = JSON.parse(localStorage.getItem('markedSubmissions') || '[]');
-      const display = document.getElementById('markedList');
+    // 更新公开的成员列表（只显示，不可操作）
+    function updatePublicMemberList() {
+      const nameList = JSON.parse(localStorage.getItem('nameList') || '[]');
+      const submittedList = JSON.parse(localStorage.getItem('submittedList') || '[]');
+      const publicListEl = document.getElementById('publicMemberList');
       
-      if (markedNames.length > 0) {
-        let html = '<div style="margin-top: 15px;"><strong>已标记为提交：</strong><br>';
-        html += markedNames.map(name => `<span style="background: #d4edda; color: #155724; padding: 3px 8px; margin: 2px; border-radius: 5px; display: inline-block;">${name} <button onclick="unmarkSubmission('${name}')" style="background: none; border: none; color: #155724; cursor: pointer;">×</button></span>`).join(' ');
-        html += '</div>';
-        display.innerHTML = html;
-      } else {
-        display.innerHTML = '<div style="color: #6c757d; margin-top: 15px;">暂无标记记录</div>';
+      if (nameList.length === 0) {
+        publicListEl.innerHTML = '<p style="color: #6c757d;">暂无名单</p>';
+        return;
       }
+      
+      let html = '<div class="member-list">';
+      nameList.forEach(name => {
+        const isSubmitted = submittedList.includes(name);
+        const statusClass = isSubmitted ? 'submitted' : 'not-submitted';
+        const statusIcon = isSubmitted ? '✅' : '⏳';
+        const statusText = isSubmitted ? '已提交' : '待提交';
+        
+        html += `
+          <div class="member-item ${statusClass}" style="cursor: default;">
+            <span>${name}</span>
+            <span>${statusIcon} ${statusText}</span>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      publicListEl.innerHTML = html;
     }
     
-    // 取消标记
-    function unmarkSubmission(name) {
-      const markedNames = JSON.parse(localStorage.getItem('markedSubmissions') || '[]');
-      const index = markedNames.indexOf(name);
-      if (index > -1) {
-        markedNames.splice(index, 1);
-        localStorage.setItem('markedSubmissions', JSON.stringify(markedNames));
-        updateMarkedList();
-        updateStatistics();
-        showAlert('info', `已取消 ${name} 的提交标记`);
-      }
-    }
-    
-    // 更新统计
+    // 更新统计数据
     function updateStatistics() {
       const nameList = JSON.parse(localStorage.getItem('nameList') || '[]');
-      const markedNames = JSON.parse(localStorage.getItem('markedSubmissions') || '[]');
+      const submittedList = JSON.parse(localStorage.getItem('submittedList') || '[]');
       
-      if (nameList.length === 0) {
-        document.getElementById('statusDisplay').innerHTML = 
-          '<div class="alert alert-warning">请先在"管理名单"页面添加成员名单！</div>';
-        
-        // 重置统计显示
-        document.getElementById('totalCount').textContent = '0';
-        document.getElementById('submittedCount').textContent = '0';
-        document.getElementById('notSubmittedCount').textContent = '0';
-        document.getElementById('submissionRate').textContent = '0%';
-        return;
-      }
+      const total = nameList.length;
+      const submitted = submittedList.filter(name => nameList.includes(name)).length;
+      const notSubmitted = total - submitted;
+      const rate = total > 0 ? Math.round((submitted / total) * 100) : 0;
       
-      const notSubmitted = nameList.filter(name => !markedNames.includes(name));
-      const submitted = nameList.filter(name => markedNames.includes(name));
-      
-      // 更新统计数据
-      document.getElementById('totalCount').textContent = nameList.length;
-      document.getElementById('submittedCount').textContent = submitted.length;
-      document.getElementById('notSubmittedCount').textContent = notSubmitted.length;
-      document.getElementById('submissionRate').textContent = 
-        Math.round((submitted.length / nameList.length) * 100) + '%';
-      
-      // 显示详细状态
-      let html = '<div style="margin-top: 30px;">';
-      
-      if (submitted.length > 0) {
-        html += '<h4 style="color: #28a745; margin-bottom: 15px;">✅ 已提交 (' + submitted.length + '人)</h4>';
-        html += '<div class="name-list">';
-        submitted.forEach(name => {
-          html += `<div class="name-item submitted">✅ ${name}</div>`;
-        });
-        html += '</div>';
-      }
-      
-      if (notSubmitted.length > 0) {
-        html += '<h4 style="color: #dc3545; margin-bottom: 15px; margin-top: 30px;">❌ 未提交 (' + notSubmitted.length + '人)</h4>';
-        html += '<div class="name-list">';
-        notSubmitted.forEach(name => {
-          html += `<div class="name-item not-submitted">❌ ${name}</div>`;
-        });
-        html += '</div>';
-      }
-      
-      html += '</div>';
-      document.getElementById('statusDisplay').innerHTML = html;
-      
-      updateMarkedList();
-      updateActivityStats();
+      document.getElementById('totalCount').textContent = total;
+      document.getElementById('submittedCount').textContent = submitted;
+      document.getElementById('notSubmittedCount').textContent = notSubmitted;
+      document.getElementById('submissionRate').textContent = rate + '%';
     }
     
-    // 更新活动统计
-    function updateActivityStats() {
-      const markedCount = JSON.parse(localStorage.getItem('markedSubmissions') || '[]').length;
-      const totalCount = JSON.parse(localStorage.getItem('nameList') || '[]').length;
-      
-      let stats = `已确认 ${markedCount} 人提交`;
-      if (totalCount > 0) {
-        const rate = Math.round((markedCount / totalCount) * 100);
-        stats += ` | 完成率 ${rate}%`;
-      }
-      
-      document.getElementById('activityStats').textContent = stats;
-    }
-    
-    // 刷新统计
-    function refreshStats() {
-      updateStatistics();
-      showAlert('info', '统计已刷新！');
-    }
-    
-    // 更新数据概览
-    function updateDataOverview() {
+    // 更新未提交提醒
+    function updateNotSubmittedAlert() {
       const nameList = JSON.parse(localStorage.getItem('nameList') || '[]');
-      const markedNames = JSON.parse(localStorage.getItem('markedSubmissions') || '[]');
+      const submittedList = JSON.parse(localStorage.getItem('submittedList') || '[]');
+      const notSubmitted = nameList.filter(name => !submittedList.includes(name));
+      const alertEl = document.getElementById('notSubmittedAlert');
       
-      const overview = document.getElementById('dataOverview');
-      overview.innerHTML = `
-        <div class="stats">
-          <div class="stat-card">
-            <div class="stat-number" style="color: #d63384;">${nameList.length}</div>
-            <div class="stat-label">名单人数</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" style="color: #28a745;">${markedNames.length}</div>
-            <div class="stat-label">已标记提交</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" style="color: #ffc107;">${nameList.length > 0 ? Math.round((markedNames.length / nameList.length) * 100) : 0}%</div>
-            <div class="stat-label">完成率</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" style="color: #007bff;">1</div>
-            <div class="stat-label">活动数量</div>
-          </div>
-        </div>
-      `;
+      if (notSubmitted.length === 0) {
+        alertEl.innerHTML = '<div class="alert alert-info">🎉 所有人都已提交！</div>';
+      } else {
+        let html = `<div class="alert" style="background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">`;
+        html += `<strong>⚠️ 还有 ${notSubmitted.length} 人未提交：</strong><br><br>`;
+        html += notSubmitted.map(name => `<span style="background: rgba(220,53,69,0.1); padding: 3px 8px; margin: 2px; border-radius: 5px; display: inline-block;">${name}</span>`).join(' ');
+        html += '</div>';
+        alertEl.innerHTML = html;
+      }
     }
     
-    // 导出统计
-    function exportStatistics() {
-      const nameList = JSON.parse(localStorage.getItem('nameList') || '[]');
-      const markedNames = JSON.parse(localStorage.getItem('markedSubmissions') || '[]');
-      
-      if (nameList.length === 0) {
-        alert('请先添加成员名单！');
-        return;
+    // 加载管理员数据
+    function loadAdminData() {
+      const names = JSON.parse(localStorage.getItem('nameList') || '[]');
+      if (names.length > 0) {
+        document.getElementById('nameList').value = names.join('\n');
       }
-      
-      const notSubmitted = nameList.filter(name => !markedNames.includes(name));
-      const submitted = nameList.filter(name => markedNames.includes(name));
-      
-      let content = `艺协舞蹈团截图收集统计报告\n`;
-      content += `生成时间：${new Date().toLocaleString()}\n`;
-      content += `腾讯问卷链接：${QUESTIONNAIRE_URL}\n\n`;
-      content += `=== 统计概览 ===\n`;
-      content += `总人数：${nameList.length}\n`;
-      content += `已提交：${submitted.length}\n`;
-      content += `未提交：${notSubmitted.length}\n`;
-      content += `完成率：${Math.round((submitted.length / nameList.length) * 100)}%\n\n`;
-      
-      if (submitted.length > 0) {
-        content += `=== 已提交名单 ===\n`;
-        submitted.forEach((name, index) => {
-          content += `${index + 1}. ${name}\n`;
-        });
-        content += `\n`;
-      }
-      
-      if (notSubmitted.length > 0) {
-        content += `=== 未提交名单 ===\n`;
-        notSubmitted.forEach((name, index) => {
-          content += `${index + 1}. ${name}\n`;
-        });
-        content += `\n`;
-      }
-      
-      content += `=== 注意事项 ===\n`;
-      content += `• 请在腾讯问卷后台查看具体的提交内容和图片\n`;
-      content += `• 问卷管理地址：https://wj.qq.com/mine.html\n`;
-      
-      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `艺协舞蹈团截图收集统计_${new Date().toISOString().slice(0,10)}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
-      
-      showAlert('success', '统计报告已导出！');
-    }
-    
-    // 导出所有数据
-    function exportAllData() {
-      const data = {
-        nameList: JSON.parse(localStorage.getItem('nameList') || '[]'),
-        markedSubmissions: JSON.parse(localStorage.getItem('markedSubmissions') || '[]'),
-        questionnaireUrl: QUESTIONNAIRE_URL,
-        exportDate: new Date().toLocaleString()
-      };
-      
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `艺协舞蹈团收集数据_${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      
-      showAlert('success', '数据导出成功！');
-    }
-    
-    // 清空所有数据
-    function clearAllData() {
-      if (confirm('确定要清空所有数据吗？包括名单和所有标记，此操作不可恢复！')) {
-        localStorage.removeItem('nameList');
-        localStorage.removeItem('markedSubmissions');
-        
-        // 重置页面显示
-        document.getElementById('nameList').value = '';
-        displayNameList();
-        updateStatistics();
-        updateDataOverview();
-        
-        showAlert('warning', '所有数据已清空！可以开始新的收集活动了');
-      }
+      updateMemberList();
+      updateNotSubmittedAlert();
     }
     
     // 显示提示信息
@@ -932,14 +662,28 @@
         existingAlert.remove();
       }
       
+      const colors = {
+        success: '#d4edda',
+        error: '#f8d7da',
+        info: '#d1ecf1',
+        warning: '#fff3cd'
+      };
+      
       const alert = document.createElement('div');
-      alert.className = `alert alert-${type} alert-message`;
+      alert.className = 'alert-message';
       alert.textContent = message;
-      alert.style.position = 'fixed';
-      alert.style.top = '20px';
-      alert.style.right = '20px';
-      alert.style.zIndex = '9999';
-      alert.style.maxWidth = '300px';
+      alert.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        max-width: 300px;
+        padding: 15px;
+        border-radius: 12px;
+        font-weight: 600;
+        background: ${colors[type] || colors.info};
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      `;
       
       document.body.appendChild(alert);
       
@@ -950,15 +694,8 @@
     
     // 页面加载时初始化
     window.addEventListener('DOMContentLoaded', function() {
-      // 恢复名单数据
-      const savedList = localStorage.getItem('nameList');
-      if (savedList) {
-        const names = JSON.parse(savedList);
-        document.getElementById('nameList').value = names.join('\n');
-      }
-      
-      displayNameList();
       updateStatistics();
+      updatePublicMemberList();
     });
   </script>
 </body>
