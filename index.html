@@ -169,7 +169,6 @@
       padding: 15px;
       border-radius: 12px;
       transition: all 0.3s ease;
-      cursor: pointer;
       border: 2px solid transparent;
       display: flex;
       align-items: center;
@@ -189,16 +188,13 @@
       border-color: #dc3545;
     }
     
-    .member-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    .member-item.clickable {
+      cursor: pointer;
     }
     
-    .member-checkbox {
-      width: 20px;
-      height: 20px;
-      margin-left: 10px;
-      cursor: pointer;
+    .member-item.clickable:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
     
     .questionnaire-link {
@@ -367,7 +363,7 @@
         </button>
       </div>
       
-      <!-- 名单公示 -->
+      <!-- 名单公示（所有人都能看到） -->
       <div class="instruction">
         <h3 style="color: #d63384; margin-bottom: 15px;">📋 参与名单</h3>
         <div id="publicMemberList"></div>
@@ -395,14 +391,13 @@
             <textarea id="nameList" placeholder="张三&#10;李四&#10;王五&#10;小红&#10;小明&#10;..."></textarea>
           </div>
           <button class="submit-button" onclick="saveNameList()">💾 保存名单</button>
-          <button class="submit-button secondary-button" onclick="loadPreviousList()">📋 加载上次名单</button>
         </div>
         
         <!-- 提交状态管理 -->
         <div class="admin-section">
           <div class="admin-title">✅ 提交状态管理</div>
           <p style="color: #856404; margin-bottom: 15px;">点击成员姓名可以切换提交状态</p>
-          <div id="memberList" class="member-list"></div>
+          <div id="adminMemberList" class="member-list"></div>
         </div>
         
         <!-- 未提交提醒 -->
@@ -443,9 +438,18 @@
     
     setInterval(createCherry, 3000);
     
+    // ==================== 重要：数据直接写在代码里 ====================
+    // 名单数据（修改这里的名单，所有人都能看到）
+    const MEMBER_NAMES = [
+      "张三", "李四", "王五", "小红", "小明", 
+      "小华", "小丽", "小强", "小美", "小东",
+      "小西", "小南", "小北", "小中", "小英"
+      // 👆 修改这里添加你的成员名单
+    ];
+    
     // 配置
     const QUESTIONNAIRE_URL = 'https://wj.qq.com/s2/23523995/5bd5/';
-    const ADMIN_PASSWORD = 'dance2024'; // 你可以修改这个密码
+    const ADMIN_PASSWORD = 'dance2024'; // 管理密码
     
     // 全局状态
     let isAdminLoggedIn = false;
@@ -462,10 +466,6 @@
       
       document.getElementById(tabName).classList.add('active');
       event.target.classList.add('active');
-      
-      if (tabName === 'submit') {
-        updatePublicMemberList();
-      }
     }
     
     // 密码验证
@@ -498,7 +498,7 @@
       showAlert('info', `${name}，问卷页面已打开，请在问卷中填写姓名并上传截图！`);
     }
     
-    // 保存名单
+    // 保存名单（管理员功能）
     function saveNameList() {
       if (!isAdminLoggedIn) return;
       
@@ -508,29 +508,10 @@
         return;
       }
       
-      const names = nameList.split('\n').filter(name => name.trim()).map(name => name.trim());
-      localStorage.setItem('nameList', JSON.stringify(names));
-      
-      updateMemberList();
-      updateStatistics();
-      updatePublicMemberList();
-      showAlert('success', `已保存 ${names.length} 个成员名单！`);
+      showAlert('info', '⚠️ 修改名单需要更新代码文件，请联系技术人员更新！');
     }
     
-    // 加载上次名单
-    function loadPreviousList() {
-      if (!isAdminLoggedIn) return;
-      
-      const names = JSON.parse(localStorage.getItem('nameList') || '[]');
-      if (names.length > 0) {
-        document.getElementById('nameList').value = names.join('\n');
-        showAlert('success', '已加载上次使用的名单！');
-      } else {
-        alert('暂无保存的名单！');
-      }
-    }
-    
-    // 切换成员提交状态
+    // 切换成员提交状态（管理员功能）
     function toggleMemberStatus(name) {
       if (!isAdminLoggedIn) return;
       
@@ -546,32 +527,23 @@
       }
       
       localStorage.setItem('submittedList', JSON.stringify(submittedList));
-      updateMemberList();
-      updateStatistics();
-      updateNotSubmittedAlert();
-      updatePublicMemberList();
+      updateAllLists();
     }
     
-    // 更新成员列表显示
-    function updateMemberList() {
-      const nameList = JSON.parse(localStorage.getItem('nameList') || '[]');
+    // 更新管理员成员列表
+    function updateAdminMemberList() {
       const submittedList = JSON.parse(localStorage.getItem('submittedList') || '[]');
-      const memberListEl = document.getElementById('memberList');
-      
-      if (nameList.length === 0) {
-        memberListEl.innerHTML = '<div class="alert alert-info">请先添加成员名单</div>';
-        return;
-      }
+      const memberListEl = document.getElementById('adminMemberList');
       
       let html = '';
-      nameList.forEach(name => {
+      MEMBER_NAMES.forEach(name => {
         const isSubmitted = submittedList.includes(name);
         const statusClass = isSubmitted ? 'submitted' : 'not-submitted';
         const statusIcon = isSubmitted ? '✅' : '❌';
         const statusText = isSubmitted ? '已提交' : '未提交';
         
         html += `
-          <div class="member-item ${statusClass}" onclick="toggleMemberStatus('${name}')">
+          <div class="member-item ${statusClass} clickable" onclick="toggleMemberStatus('${name}')">
             <span>${name}</span>
             <span>${statusIcon} ${statusText}</span>
           </div>
@@ -581,26 +553,20 @@
       memberListEl.innerHTML = html;
     }
     
-    // 更新公开的成员列表（只显示，不可操作）
+    // 更新公开的成员列表（所有人都能看到）
     function updatePublicMemberList() {
-      const nameList = JSON.parse(localStorage.getItem('nameList') || '[]');
       const submittedList = JSON.parse(localStorage.getItem('submittedList') || '[]');
       const publicListEl = document.getElementById('publicMemberList');
       
-      if (nameList.length === 0) {
-        publicListEl.innerHTML = '<p style="color: #6c757d;">暂无名单</p>';
-        return;
-      }
-      
       let html = '<div class="member-list">';
-      nameList.forEach(name => {
+      MEMBER_NAMES.forEach(name => {
         const isSubmitted = submittedList.includes(name);
         const statusClass = isSubmitted ? 'submitted' : 'not-submitted';
         const statusIcon = isSubmitted ? '✅' : '⏳';
         const statusText = isSubmitted ? '已提交' : '待提交';
         
         html += `
-          <div class="member-item ${statusClass}" style="cursor: default;">
+          <div class="member-item ${statusClass}">
             <span>${name}</span>
             <span>${statusIcon} ${statusText}</span>
           </div>
@@ -613,11 +579,10 @@
     
     // 更新统计数据
     function updateStatistics() {
-      const nameList = JSON.parse(localStorage.getItem('nameList') || '[]');
       const submittedList = JSON.parse(localStorage.getItem('submittedList') || '[]');
       
-      const total = nameList.length;
-      const submitted = submittedList.filter(name => nameList.includes(name)).length;
+      const total = MEMBER_NAMES.length;
+      const submitted = submittedList.filter(name => MEMBER_NAMES.includes(name)).length;
       const notSubmitted = total - submitted;
       const rate = total > 0 ? Math.round((submitted / total) * 100) : 0;
       
@@ -629,9 +594,8 @@
     
     // 更新未提交提醒
     function updateNotSubmittedAlert() {
-      const nameList = JSON.parse(localStorage.getItem('nameList') || '[]');
       const submittedList = JSON.parse(localStorage.getItem('submittedList') || '[]');
-      const notSubmitted = nameList.filter(name => !submittedList.includes(name));
+      const notSubmitted = MEMBER_NAMES.filter(name => !submittedList.includes(name));
       const alertEl = document.getElementById('notSubmittedAlert');
       
       if (notSubmitted.length === 0) {
@@ -645,13 +609,20 @@
       }
     }
     
+    // 更新所有列表
+    function updateAllLists() {
+      updateStatistics();
+      updatePublicMemberList();
+      if (isAdminLoggedIn) {
+        updateAdminMemberList();
+        updateNotSubmittedAlert();
+      }
+    }
+    
     // 加载管理员数据
     function loadAdminData() {
-      const names = JSON.parse(localStorage.getItem('nameList') || '[]');
-      if (names.length > 0) {
-        document.getElementById('nameList').value = names.join('\n');
-      }
-      updateMemberList();
+      document.getElementById('nameList').value = MEMBER_NAMES.join('\n');
+      updateAdminMemberList();
       updateNotSubmittedAlert();
     }
     
@@ -694,8 +665,7 @@
     
     // 页面加载时初始化
     window.addEventListener('DOMContentLoaded', function() {
-      updateStatistics();
-      updatePublicMemberList();
+      updateAllLists();
     });
   </script>
 </body>
